@@ -1,3 +1,5 @@
+using Unity.VisualScripting;
+using UnityEditor.PackageManager.UI;
 using UnityEngine;
 
 public class WaveMaker : AudioPull
@@ -14,6 +16,14 @@ public class WaveMaker : AudioPull
 
     private float phase = 0f;
 
+    float sampleRate;
+
+    public WaveMaker()
+    {
+        sampleRate = AudioSettings.outputSampleRate;
+        Debug.Log("Sample rate: " + sampleRate);
+    }
+
     public override float[] Pull(int framesRequested)
     {
         // this is where it grabs the information from the midi info and forms it into waves
@@ -23,7 +33,7 @@ public class WaveMaker : AudioPull
 
         // test freqeuncy
         float[] buffer = new float[framesRequested];
-        float sampleRate = AudioSettings.outputSampleRate;
+
         float phaseIncrement = frequency / sampleRate;
 
         for (int i = 0; i < framesRequested; i++)

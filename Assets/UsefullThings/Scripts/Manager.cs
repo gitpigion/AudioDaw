@@ -11,6 +11,7 @@ public class Manager : MonoBehaviour
 
     public GameObject prefab;
 
+    private MasterSend masterSend;
     // keeps track off what busses are connected to where, and what wavemakers are connected to
     // changes these connection around
 
@@ -38,7 +39,15 @@ public class Manager : MonoBehaviour
 
     void Start()
     {
+        masterSend = gameObject.GetComponent<MasterSend>();
+        var source = GetComponent<AudioSource>();
+        source.loop = true;
+        source.Play();
         CreateSoundGameObject();
+        // testing
+        masterSend.Pulls.Add(Sounds[0].waveMaker);
+
+        
     }
 
 }

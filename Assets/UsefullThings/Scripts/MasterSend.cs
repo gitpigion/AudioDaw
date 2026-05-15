@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections;
 using Unity.VisualScripting;
 
+[RequireComponent(typeof(AudioSource))]
 public class MasterSend : MonoBehaviour
 {
     //Trigger every call for audio, asks for a buffer with a preset amount of samples.
@@ -26,25 +27,26 @@ public class MasterSend : MonoBehaviour
 
 
     void OnAudioFilterRead(float[] data, int channels)
+{
+    int framesRequested = data.Length / channels;
+
+    // zero the buffer first
+    for (int i = 0; i < data.Length; i++) 
+        data[i] = 0f;
+
+    foreach (AudioPull pull in Pulls)
     {
-        if (channels == 0)
+        float[] pulled = pull.Pull(framesRequested);
+
+        for (int i = 0; i < framesRequested; i++)
         {
-            //  combines the pull signals with the data to be sent over
-            // this is bassicaly useless and only works in mono
-            // but i dont want to interleave yet
-            foreach (AudioPull pull in Pulls)
+            for (int c = 0; c < channels; c++)
             {
-                float[] dataToAdd = pull.Pull(bufferLength);
-                for (int i = 0; i < data.Length; i++)
-                {
-                    data[i] += dataToAdd[i];
-                }
+                data[i * channels + c] += pulled[i];
             }
         }
-
-        //call from busses
-        //process into leaved signal
     }
+}
     
  
 }
