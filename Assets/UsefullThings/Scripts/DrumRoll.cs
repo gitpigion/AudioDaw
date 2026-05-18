@@ -23,4 +23,32 @@ public class DrumRoll : MonoBehaviour
 
     public List<AudioMidi> audioMidis;
 
+    GameObject cellPrefab;
+
+    public int y = 8;
+    public int x = 20;
+
+    amplitudes = new float [YieldInstruction, x];
+
+    void Start()
+{   
+    for (int row = 0; row < y; row++)
+    {
+        for (int col = 0; col < x; col++)
+        {
+            GameObject cell = Instantiate(cellPrefab, transform);
+            cell.transform.localPosition = new Vector3(col, row, 0);
+            
+            DrumCell dc = cell.GetComponent<DrumCell>();
+            dc.row = row;
+            dc.col = col;
+        }
+    }
+}
+
+public void SetCell(int row, int col, float amplitude)
+{
+    amplitudes[row, col] = amplitude;
+}
+
 }
