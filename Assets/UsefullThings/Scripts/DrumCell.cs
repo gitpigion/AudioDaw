@@ -15,15 +15,18 @@ public class DrumCell : MonoBehaviour
         drumRoll = GetComponentInParent<DrumRoll>();
     }
 
-    void OnMouseDown()
-    {
-        amplitude = amplitude > 0f ? 0f : 1f;
-        UpdateVisual();
-        drumRoll.SetCell(row, col, amplitude);
-    }
+
 
     void UpdateVisual()
     {
         rend.material.color = amplitude > 0f ? Color.cyan : Color.gray;
+        Debug.Log(row + " " + col);
     }
+
+    public void OnClick()
+{
+    amplitude = amplitude > 0f ? 0f : 1f;
+    UpdateVisual();
+    drumRoll.SetCell(row, col, amplitude);
+}
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class DrumRoll : MonoBehaviour
 {
@@ -21,17 +22,19 @@ public class DrumRoll : MonoBehaviour
 
     */
 
-    public List<AudioMidi> audioMidis;
+public List<AudioMidi> audioMidis;
 
-    GameObject cellPrefab;
+public GameObject cellPrefab;
 
-    public int y = 8;
-    public int x = 20;
+public int y = 8;
+public int x = 20;
 
-    amplitudes = new float [YieldInstruction, x];
+float [,] amplitudes;
 
-    void Start()
+void Start()
 {   
+    amplitudes = new float[y,x];
+
     for (int row = 0; row < y; row++)
     {
         for (int col = 0; col < x; col++)
@@ -49,6 +52,21 @@ public class DrumRoll : MonoBehaviour
 public void SetCell(int row, int col, float amplitude)
 {
     amplitudes[row, col] = amplitude;
+}
+
+void Update()
+{
+    // in DrumRoll Update instead of OnMouseDown on each cell
+    if (Mouse.current.leftButton.wasPressedThisFrame)
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {   
+            DrumCell cell = hit.collider.GetComponent<DrumCell>();
+            if (cell != null)
+                cell.OnClick();
+        }
+    }
 }
 
 }

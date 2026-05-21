@@ -265,9 +265,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1785867644}
-  - component: {fileID: 1785867643}
   - component: {fileID: 1785867646}
+  - component: {fileID: 1785867643}
   - component: {fileID: 1785867645}
+  - component: {fileID: 1785867647}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -303,7 +304,7 @@ Transform:
   m_GameObject: {fileID: 1785867642}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.00597, y: -0.00525, z: 0}
+  m_LocalPosition: {x: -7.3, y: -3.16, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -418,6 +419,22 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1785867647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1785867642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bfcc0f29968649c594dcae7b4c2a28f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DrumRoll
+  audioMidis: []
+  cellPrefab: {fileID: 3835258658184174524, guid: 5ccca79759be34838a711f1e3249a5c4, type: 3}
+  y: 8
+  x: 20
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
