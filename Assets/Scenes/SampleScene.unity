@@ -269,6 +269,7 @@ GameObject:
   - component: {fileID: 1785867643}
   - component: {fileID: 1785867645}
   - component: {fileID: 1785867647}
+  - component: {fileID: 1785867648}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -431,10 +432,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bfcc0f29968649c594dcae7b4c2a28f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DrumRoll
-  audioMidis: []
+  audioMidis:
+  - {fileID: 1785867648}
   cellPrefab: {fileID: 3835258658184174524, guid: 5ccca79759be34838a711f1e3249a5c4, type: 3}
-  y: 8
+  y: 12
   x: 20
+  bpm: 120
+  loopSize: 0
+  LineGameObject: {fileID: 1672617471979675701, guid: 1dd3ee1e9cbd844bc9460755108186b6, type: 3}
+  LineEndPoint: {x: 0, y: 0, z: 0}
+  LineStartPoint: {x: 0, y: 1.89, z: 0}
+--- !u!114 &1785867648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1785867642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f824be9d0ee67486fa18bb6877597321, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioMidi
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

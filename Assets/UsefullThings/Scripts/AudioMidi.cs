@@ -4,7 +4,7 @@ public class AudioMidi : MonoBehaviour
 {
     WaveMaker waveMaker;
 
-    public void Play()
+    public void Play(float amplitude)
     {
         
     }
