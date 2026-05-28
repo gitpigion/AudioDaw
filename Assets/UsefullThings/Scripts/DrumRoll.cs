@@ -27,6 +27,7 @@ public List<AudioMidi> audioMidis;
 
 public GameObject cellPrefab;
 
+
 public int y = 8;
 public int x = 20;
 
@@ -40,6 +41,7 @@ private LineRenderer Line;
 
 public Vector3 LineEndPoint;
 public Vector3 LineStartPoint;
+
 
 float [,] amplitudes;
 DrumCell [,] cells;
@@ -83,6 +85,11 @@ public void SetCell(int row, int col, float amplitude)
     amplitudes[col, row] = amplitude;
 }
 
+public void AddSound(SoundMaster soundMaster)
+{
+    audioMidis.Add(soundMaster.audioMidi);
+}
+
 float timer = 0;
 void Update()
 {
@@ -111,11 +118,23 @@ void Update()
 
 void CallMidis(AudioMidi midi)
     {
+        List<float> noteBatch = new List<float>();
+        List<float> ampBatch = new List<float>();
         for (int i = 0; i < y; i++)
         {
-            midi.Play(cells[loopPosition,i].amplitude);
-            Debug.Log(cells[loopPosition,i].amplitude + " " + loopPosition + " x= "+ x + " y = "+ y);
+            float amplitude = cells[loopPosition,i].amplitude;
+            if (amplitude >0)
+            {
+                noteBatch.Add(NoteTable.GetFrequency(i));
+            }
         }
+        float[] compNoteBatch = noteBatch.ToArray();
+        float[] compAmpBatch = ampBatch.ToArray();
+        if (compNoteBatch.Length >0 )
+        {
+            midi.Play(compAmpBatch, compNoteBatch);   
+        }
+
         loopPosition++;
         if (loopPosition >= x)
         {

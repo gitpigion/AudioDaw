@@ -13,6 +13,8 @@ public class Manager : MonoBehaviour
     public GameObject prefab;
 
     private MasterSend masterSend;
+
+    private DrumRoll drumRoll;
     // keeps track off what busses are connected to where, and what wavemakers are connected to
     // changes these connection around
 
@@ -29,6 +31,7 @@ public class Manager : MonoBehaviour
 
         SoundMaster soundMaster = new SoundMaster(wave, waveObject, waveObject.GetComponent<AudioMidi>());
         Sounds.Add(soundMaster);
+        drumRoll.AddSound(soundMaster);
     }
 
     public void Link(AudioPull input, AudioPull output)
@@ -41,6 +44,7 @@ public class Manager : MonoBehaviour
     void Start()
     {
         masterSend = gameObject.GetComponent<MasterSend>();
+        drumRoll = gameObject.GetComponent<DrumRoll>();
         var source = GetComponent<AudioSource>();
         source.loop = true;
         source.Play();
@@ -65,5 +69,6 @@ public class SoundMaster
         this.waveMaker = waveMaker;
         this.gameObject = gameObject;
         this.audioMidi = audioMidi;
+        audioMidi.SetWave(waveMaker);
     }
 }
