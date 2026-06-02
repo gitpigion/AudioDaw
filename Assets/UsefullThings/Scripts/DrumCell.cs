@@ -9,23 +9,38 @@ public class DrumCell : MonoBehaviour
     private DrumRoll drumRoll;
     private Renderer rend;
 
+    private Color baseColor;
+
+    static readonly int[] blackKeys = { 1, 3, 6, 8, 10 }; // Eb, F#, Ab, Bb, C#  in low to high order matching NoteTable
+
     void Start()
     {
         rend = GetComponent<Renderer>();
         drumRoll = GetComponentInParent<DrumRoll>();
+
+        baseColor = IsBlackKey(row) ? Color.black : Color.white;
+        rend.material.color = baseColor;
     }
 
-
-
-    void UpdateVisual()
+    bool IsBlackKey(int note)
     {
-        rend.material.color = amplitude > 0f ? Color.cyan : Color.gray;
+        foreach (int b in blackKeys)
+            if (b == note) return true;
+        return false;
     }
 
     public void OnClick()
     {
-    amplitude = amplitude > 0f ? 0f : 1f;
-    UpdateVisual();
-    drumRoll.SetCell(row, col, amplitude);
+        amplitude = amplitude > 0f ? 0f : 1f;
+        UpdateVisual();
+        drumRoll.SetCell(row, col, amplitude);
+    }
+
+    void UpdateVisual()
+    {
+        if (amplitude > 0f)
+            rend.material.color = Color.cyan;
+        else
+            rend.material.color = baseColor;
     }
 }

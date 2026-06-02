@@ -56,7 +56,9 @@ void Start()
     this.transform.position.y-squashValueY/2 , this.transform.position.z);;
     LineEndPoint = new Vector3(this.transform.position.x, 
     this.transform.position.y + y*squashValueY-squashValueY/2, this.transform.position.z);
-    
+    DrawGrid();
+
+
     Line = Instantiate<GameObject>(LineGameObject).GetComponent<LineRenderer>();
     Line.SetWidth(0.1f, 0.1f);
     Line.SetPosition(0, LineStartPoint);
@@ -116,8 +118,11 @@ void Update()
     }
 }
 
+
+
 void CallMidis(AudioMidi midi)
     {
+
         List<float> noteBatch = new List<float>();
         List<float> ampBatch = new List<float>();
         for (int i = 0; i < y; i++)
@@ -127,6 +132,8 @@ void CallMidis(AudioMidi midi)
             {
                 noteBatch.Add(NoteTable.GetFrequency(i));
             }
+
+
         }
         float[] compNoteBatch = noteBatch.ToArray();
         float[] compAmpBatch = ampBatch.ToArray();
@@ -134,7 +141,7 @@ void CallMidis(AudioMidi midi)
         {
             midi.Play(compAmpBatch, compNoteBatch);   
         }
-
+        
         loopPosition++;
         if (loopPosition >= x)
         {
@@ -148,6 +155,32 @@ void CallMidis(AudioMidi midi)
     {
         Line.transform.position = new Vector3(-squashValueX,0,0);
     }
+
+
+   void DrawGrid()
+{
+    // vertical lines
+    for (int col = 0; col <= x; col++)
+    {
+        float xPos = transform.position.x + col * squashValueX - squashValueX / 2;
+
+        LineRenderer gridLine = Instantiate(LineGameObject).GetComponent<LineRenderer>();
+        gridLine.SetWidth(0.05f, 0.05f);
+        gridLine.SetPosition(0, new Vector3(xPos, transform.position.y - squashValueY / 2, 0));
+        gridLine.SetPosition(1, new Vector3(xPos, transform.position.y + y * squashValueY - squashValueY / 2, 0));
+    }
+
+    // horizontal lines
+    for (int row = 0; row <= y; row++)
+    {
+        float yPos = transform.position.y + row * squashValueY - squashValueY / 2;
+
+        LineRenderer gridLine = Instantiate(LineGameObject).GetComponent<LineRenderer>();
+        gridLine.SetWidth(0.05f, 0.05f);
+        gridLine.SetPosition(0, new Vector3(transform.position.x - squashValueX / 2, yPos, 0));
+        gridLine.SetPosition(1, new Vector3(transform.position.x + x * squashValueX - squashValueX / 2, yPos, 0));
+    }
+}
 
 /*
     drum roll will jump from beat to beat, with a rate of 60BPM

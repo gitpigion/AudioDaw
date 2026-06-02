@@ -2,16 +2,16 @@ using UnityEngine;
 
 public class AudioMidi : MonoBehaviour
 {
+    WaveMaker waveMaker;
+
     public void SetWave(WaveMaker wave)
     {
         waveMaker = wave;
+        waveMaker.Init();  // initialise sample rate as soon as wave is set
     }
-    WaveMaker waveMaker;
 
-    public void Play(float[] amplitudes, float[] TarFrequencys)
+    public void Play(float[] amplitudes, float[] tarFrequencies)
     {
-        
-        waveMaker.SetFrequency(TarFrequencys);
+        waveMaker.SetFrequency(tarFrequencies);
     }
-    
 }
