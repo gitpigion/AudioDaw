@@ -269,6 +269,7 @@ GameObject:
   - component: {fileID: 1785867643}
   - component: {fileID: 1785867645}
   - component: {fileID: 1785867647}
+  - component: {fileID: 1785867648}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -440,6 +441,19 @@ MonoBehaviour:
   LineGameObject: {fileID: 1672617471979675701, guid: 1dd3ee1e9cbd844bc9460755108186b6, type: 3}
   LineEndPoint: {x: 0, y: 0, z: 0}
   LineStartPoint: {x: 0, y: 1.89, z: 0}
+  squashValueX: 0
+--- !u!114 &1785867648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1785867642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2632b7928eae14a16949f233547b91cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UITouch
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

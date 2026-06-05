@@ -30,23 +30,21 @@ public class MasterSend : MonoBehaviour
 {
     int framesRequested = data.Length / channels;
 
-    // zero the buffer first
-    for (int i = 0; i < data.Length; i++) 
+    for (int i = 0; i < data.Length; i++)
         data[i] = 0f;
 
     foreach (AudioPull pull in Pulls)
     {
-        float[] pulled = pull.Pull(framesRequested);
+        float[] pulled = pull.Pull(framesRequested); // reuses pre-allocated buffer now
 
         for (int i = 0; i < framesRequested; i++)
-        {
             for (int c = 0; c < channels; c++)
-            {
                 data[i * channels + c] += pulled[i];
-            }
-        }
     }
 }
+
+    // check for bad output
+ 
     
  
 }

@@ -6,6 +6,8 @@ public class DrumCell : MonoBehaviour
     public int col;
     public float amplitude = 0f;
 
+    public float noteLength;
+
     private DrumRoll drumRoll;
     private Renderer rend;
 

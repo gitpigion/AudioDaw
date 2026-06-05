@@ -37,7 +37,7 @@ public class Manager : MonoBehaviour
     public void Link(AudioPull input, AudioPull output)
     {
         // takes the input and adds the output to its inputs
-        output.inputs.Add(input);
+        //output.inputs.Add(input);
     }
 
 

@@ -42,14 +42,17 @@ private LineRenderer Line;
 public Vector3 LineEndPoint;
 public Vector3 LineStartPoint;
 
+UITouch uI;
 
 float [,] amplitudes;
+float [,] lengths;
 DrumCell [,] cells;
 
-float squashValueX;
+public float squashValueX;
 float squashValueY;
 void Start()
 {   
+    uI = GetComponent<UITouch>();
     squashValueX = cellPrefab.transform.localScale.x  ;
     squashValueY = cellPrefab.transform.localScale.y ;
     LineStartPoint = new Vector3(this.transform.position.x, 
@@ -57,6 +60,8 @@ void Start()
     LineEndPoint = new Vector3(this.transform.position.x, 
     this.transform.position.y + y*squashValueY-squashValueY/2, this.transform.position.z);
     DrawGrid();
+
+    uI.Init(squashValueX, this);
 
 
     Line = Instantiate<GameObject>(LineGameObject).GetComponent<LineRenderer>();
@@ -106,40 +111,38 @@ void Update()
         }
 
     // in DrumRoll Update instead of OnMouseDown on each cell
-    if (Mouse.current.leftButton.wasPressedThisFrame)
-    {
-        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        if (Physics.Raycast(ray, out RaycastHit hit))
-        {   
-            DrumCell cell = hit.collider.GetComponent<DrumCell>();
-            if (cell != null)
-                cell.OnClick();
-        }
-    }
+    
 }
 
-
+private float[] compNoteBatch = new float[0];
+private float[] compAmpBatch = new float[0];
+private float[] compLengthBatch = new float[0];
 
 void CallMidis(AudioMidi midi)
     {
 
         List<float> noteBatch = new List<float>();
         List<float> ampBatch = new List<float>();
+        List<float> lengthBatch = new List<float>();
         for (int i = 0; i < y; i++)
         {
-            float amplitude = cells[loopPosition,i].amplitude;
+            float amplitude = amplitudes[loopPosition, i];
+            float length = cells[loopPosition, i].noteLength;
             if (amplitude >0)
             {
                 noteBatch.Add(NoteTable.GetFrequency(i));
+                ampBatch.Add(amplitude);
+                lengthBatch.Add(length);
             }
 
 
         }
-        float[] compNoteBatch = noteBatch.ToArray();
-        float[] compAmpBatch = ampBatch.ToArray();
+        compNoteBatch = noteBatch.ToArray();
+        compAmpBatch = ampBatch.ToArray();
+        compLengthBatch = lengthBatch.ToArray();
         if (compNoteBatch.Length >0 )
         {
-            midi.Play(compAmpBatch, compNoteBatch);   
+            midi.Play(compAmpBatch, compNoteBatch, compLengthBatch);   
         }
         
         loopPosition++;
