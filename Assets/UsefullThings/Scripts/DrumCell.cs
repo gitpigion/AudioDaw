@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class DrumCell : MonoBehaviour
@@ -6,9 +7,10 @@ public class DrumCell : MonoBehaviour
     public int col;
     public float amplitude = 0f;
 
-    public float noteLength;
+    public float noteLength = 0f;
 
     private DrumRoll drumRoll;
+    private TextMeshPro textMeshPro;
     private Renderer rend;
 
     private Color baseColor;
@@ -22,6 +24,9 @@ public class DrumCell : MonoBehaviour
 
         baseColor = IsBlackKey(row) ? Color.black : Color.white;
         rend.material.color = baseColor;
+
+        textMeshPro = GetComponentInChildren<TextMeshPro>();
+        UpdateVisual();
     }
 
     bool IsBlackKey(int note)
@@ -34,6 +39,7 @@ public class DrumCell : MonoBehaviour
     public void OnClick()
     {
         amplitude = amplitude > 0f ? 0f : 1f;
+        noteLength = noteLength > 0f ? 0f : 1f;
         UpdateVisual();
         drumRoll.SetCell(row, col, amplitude);
     }
@@ -44,5 +50,7 @@ public class DrumCell : MonoBehaviour
             rend.material.color = Color.cyan;
         else
             rend.material.color = baseColor;
+        textMeshPro.text = noteLength.ToString();
+        Debug.Log(amplitude);
     }
 }

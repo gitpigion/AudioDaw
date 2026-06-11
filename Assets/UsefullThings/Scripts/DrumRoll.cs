@@ -48,11 +48,13 @@ float [,] amplitudes;
 float [,] lengths;
 DrumCell [,] cells;
 
+public GameObject Canvas;
+
 public float squashValueX;
 float squashValueY;
 void Start()
 {   
-    uI = GetComponent<UITouch>();
+    uI = Canvas.GetComponent<UITouch>();
     squashValueX = cellPrefab.transform.localScale.x  ;
     squashValueY = cellPrefab.transform.localScale.y ;
     LineStartPoint = new Vector3(this.transform.position.x, 

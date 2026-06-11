@@ -15,6 +15,9 @@ public class UITouch : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
     DrumRoll drumRoll;
     DrumCell cell ;
+
+    Vector2 dragStartPosistion;
+
     
 
     // Update is called once per frame
@@ -40,14 +43,17 @@ public class UITouch : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-       
+       dragStartPosistion = eventData.position;
+       Debug.Log(dragStartPosistion);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (cell != null)
-            cell.OnClick();
-        Debug.Log("dragging");
+        Vector2 dragCurrentPosition = eventData.position;
+        float dragDistanceX = dragStartPosistion.x-dragCurrentPosition.x;
+        float dragDistanceY = dragStartPosistion.y-dragCurrentPosition.y;
+
+        Debug.Log(dragDistanceX + " and for y " + dragDistanceY);
     }
 
     public void OnEndDrag(PointerEventData eventData)
