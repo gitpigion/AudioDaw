@@ -48,13 +48,17 @@ float [,] amplitudes;
 float [,] lengths;
 DrumCell [,] cells;
 
-public GameObject Canvas;
 
 public float squashValueX;
 float squashValueY;
+
+float moveX = 0;
+float moveY = 0;
 void Start()
 {   
-    uI = Canvas.GetComponent<UITouch>();
+    moveX = transform.position.x;
+    moveY = transform.position.y;
+    uI = GetComponent<UITouch>();
     squashValueX = cellPrefab.transform.localScale.x  ;
     squashValueY = cellPrefab.transform.localScale.y ;
     LineStartPoint = new Vector3(this.transform.position.x, 
@@ -67,6 +71,7 @@ void Start()
 
 
     Line = Instantiate<GameObject>(LineGameObject).GetComponent<LineRenderer>();
+    Line.   sortingOrder = 5;
     Line.SetWidth(0.1f, 0.1f);
     Line.SetPosition(0, LineStartPoint);
     Line.SetPosition(1, LineEndPoint);
@@ -79,7 +84,8 @@ void Start()
         for (int col = 0; col < x; col++)
         {
             GameObject cell = Instantiate(cellPrefab, transform);
-            cell.transform.localPosition = new Vector3(col*squashValueX, row * squashValueY, 0);
+            
+            cell.transform.position= new Vector3(col*squashValueX + moveX, row * squashValueY + moveY, 0);
             
             DrumCell dc = cell.GetComponent<DrumCell>();
             dc.row = row;
@@ -170,6 +176,7 @@ void CallMidis(AudioMidi midi)
         float xPos = transform.position.x + col * squashValueX - squashValueX / 2;
 
         LineRenderer gridLine = Instantiate(LineGameObject).GetComponent<LineRenderer>();
+        gridLine.sortingOrder = 5;
         gridLine.SetWidth(0.05f, 0.05f);
         gridLine.SetPosition(0, new Vector3(xPos, transform.position.y - squashValueY / 2, 0));
         gridLine.SetPosition(1, new Vector3(xPos, transform.position.y + y * squashValueY - squashValueY / 2, 0));
@@ -181,6 +188,7 @@ void CallMidis(AudioMidi midi)
         float yPos = transform.position.y + row * squashValueY - squashValueY / 2;
 
         LineRenderer gridLine = Instantiate(LineGameObject).GetComponent<LineRenderer>();
+         gridLine.sortingOrder = 5;
         gridLine.SetWidth(0.05f, 0.05f);
         gridLine.SetPosition(0, new Vector3(transform.position.x - squashValueX / 2, yPos, 0));
         gridLine.SetPosition(1, new Vector3(transform.position.x + x * squashValueX - squashValueX / 2, yPos, 0));

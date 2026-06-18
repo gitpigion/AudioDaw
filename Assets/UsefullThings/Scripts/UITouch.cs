@@ -3,6 +3,7 @@ using System.Net;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
+using Unity.VisualScripting;
 
 public class UITouch : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -18,8 +19,15 @@ public class UITouch : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
 
     Vector2 dragStartPosistion;
 
-    
+    DrumCell dragCell;
 
+    private Camera mainCamera;
+
+
+    void Start()
+    {
+        mainCamera = Camera.main;
+    }
     // Update is called once per frame
     void Update()
     {
@@ -44,6 +52,9 @@ public class UITouch : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
     public void OnBeginDrag(PointerEventData eventData)
     {
        dragStartPosistion = eventData.position;
+       Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+       Physics.Raycast(ray, out RaycastHit hit);
+       dragCell = hit.collider.GetComponent<DrumCell>();
        Debug.Log(dragStartPosistion);
     }
 
@@ -53,7 +64,17 @@ public class UITouch : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
         float dragDistanceX = dragStartPosistion.x-dragCurrentPosition.x;
         float dragDistanceY = dragStartPosistion.y-dragCurrentPosition.y;
 
-        Debug.Log(dragDistanceX + " and for y " + dragDistanceY);
+        dragCell.amplitude -= dragDistanceY/100;
+        if (dragCell.amplitude >1)
+            dragCell.amplitude = 1;
+        
+        if (dragCell.amplitude <0)
+            dragCell.amplitude = 0;
+        
+
+
+        dragCell.noteLength += dragDistanceX/100;
+         dragCell.UpdateVisual();
     }
 
     public void OnEndDrag(PointerEventData eventData)

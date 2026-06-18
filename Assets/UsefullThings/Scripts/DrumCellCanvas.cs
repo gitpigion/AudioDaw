@@ -1,8 +1,8 @@
 using TMPro;
-using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class DrumCell : MonoBehaviour
+public class DrumCellCanvas : MonoBehaviour
 {
     public int row;
     public int col;
@@ -11,36 +11,22 @@ public class DrumCell : MonoBehaviour
     public float noteLength = 0f;
 
     private DrumRoll drumRoll;
-
-    private SpriteRenderer squareRenderer;
-    public GameObject square;
     private TextMeshPro textMeshPro;
-    private Renderer rend;
+    private Image rend;
 
     private Color baseColor;
-
-    RectTransform rect; 
-    Vector2 initialPos; 
 
     static readonly int[] blackKeys = { 1, 3, 6, 8, 10 }; // Eb, F#, Ab, Bb, C#  in low to high order matching NoteTable
 
     void Start()
     {
-        rend = GetComponent<Renderer>();
+        rend = GetComponent<Image>();
         drumRoll = GetComponentInParent<DrumRoll>();
 
         baseColor = IsBlackKey(row) ? Color.black : Color.white;
-        rend.material.color = baseColor;
+        rend.color = baseColor;
 
         textMeshPro = GetComponentInChildren<TextMeshPro>();
-
-        squareRenderer = square.GetComponent<SpriteRenderer>();
-        
-        squareRenderer.material.color = Color.clear;
-
-        rect = square.GetComponent<RectTransform>();
-        initialPos = rect.anchoredPosition;
-        
         UpdateVisual();
     }
 
@@ -59,18 +45,13 @@ public class DrumCell : MonoBehaviour
         drumRoll.SetCell(row, col, amplitude);
     }
 
-    public void UpdateVisual()
+    void UpdateVisual()
     {
         if (amplitude > 0f)
-            squareRenderer.material.color = Color.cyan;
+            rend.material.color = Color.cyan;
         else
-            squareRenderer.material.color = baseColor;
-        textMeshPro.text = amplitude.ToString();
-
-        
-        rect.localScale = new Vector2 (1, amplitude);
-        rect.anchoredPosition = new Vector2(initialPos.x, initialPos.y + amplitude/2 -0.5f);
-        drumRoll.SetCell(row, col, amplitude);
-        Debug.Log(math.abs(amplitude* (1- amplitude)));
+            rend.material.color = baseColor;
+        textMeshPro.text = noteLength.ToString();
+        Debug.Log(amplitude);
     }
 }

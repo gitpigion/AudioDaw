@@ -89,6 +89,7 @@ public class WaveMaker : AudioPull
                 sustain = 0.5f,
                 release = 0.3f,
                 amplitude = pendingAmplitudes[i]
+
             };
             envelopes[i].NoteOn();
         }
@@ -209,7 +210,7 @@ public class Envelope
                 }
                 break;
         }
-
+        
         return currentValue;
     }
 }

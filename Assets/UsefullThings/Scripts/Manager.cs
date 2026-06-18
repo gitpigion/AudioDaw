@@ -14,7 +14,7 @@ public class Manager : MonoBehaviour
 
     private MasterSend masterSend;
 
-    private DrumRoll drumRoll;
+    public DrumRoll drumRoll;
     // keeps track off what busses are connected to where, and what wavemakers are connected to
     // changes these connection around
 
@@ -44,7 +44,6 @@ public class Manager : MonoBehaviour
     void Start()
     {
         masterSend = gameObject.GetComponent<MasterSend>();
-        drumRoll = gameObject.GetComponent<DrumRoll>();
         var source = GetComponent<AudioSource>();
         source.loop = true;
         source.Play();
