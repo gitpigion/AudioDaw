@@ -27,6 +27,7 @@ public List<AudioMidi> audioMidis;
 
 public GameObject cellPrefab;
 
+public GameObject segmentPrefab;
 
 public int y = 8;
 public int x = 20;
@@ -47,6 +48,18 @@ UITouch uI;
 float [,] amplitudes;
 float [,] lengths;
 DrumCell [,] cells;
+
+public List<float[,]> segments;
+
+List<GameObject> segmentObjs;
+List<Segment> segmentClasses;
+
+int curSegment;
+
+public float xPosSegments;
+public float yPosSegments;
+
+public float segmentSeperation;
 
 
 public float squashValueX;
@@ -70,6 +83,9 @@ void Start()
     uI.Init(squashValueX, this);
 
 
+    segmentObjs = new List<GameObject>();
+    segmentClasses = new List<Segment>();
+
     Line = Instantiate<GameObject>(LineGameObject).GetComponent<LineRenderer>();
     Line.   sortingOrder = 5;
     Line.SetWidth(0.1f, 0.1f);
@@ -78,8 +94,22 @@ void Start()
     resetLine();
     amplitudes = new float[x,y];
     cells = new DrumCell[x,y];
+    CreateRoll();
+    segments = new List<float[,]>();
+    CreateSegments();
+    CreateSegments();
+    CreateSegments();
+   
+}
 
-    for (int row = 0; row < y; row++)
+
+public void CreateRoll(float[,] amplitudes = null)
+    {
+        if (amplitudes != null)
+        {
+            this.amplitudes = amplitudes;
+        }
+        for (int row = 0; row < y; row++)
     {
         for (int col = 0; col < x; col++)
         {
@@ -93,17 +123,59 @@ void Start()
             cells[col,row] = dc;
         }
     }
-}
+    }
 
 public void SetCell(int row, int col, float amplitude)
 {
     amplitudes[col, row] = amplitude;
+    UpdateSegment();
 }
 
 public void AddSound(SoundMaster soundMaster)
 {
     audioMidis.Add(soundMaster.audioMidi);
 }
+
+void SetSegment(int segement)
+    {
+        segments[segement] = new float[x,y];
+    }
+
+public void UpdateSegment()
+    {
+        segments[curSegment-1] = amplitudes;
+    }
+
+void CreateSegments()
+    {
+
+        GameObject seg = Instantiate(segmentPrefab);
+        Segment segClass;
+        segmentObjs.Add(seg);
+        segClass = seg.GetComponent<Segment>();
+        segmentClasses.Add(segClass);
+        segClass.Index = segments.Count;
+        seg.transform.position = new Vector3 (xPosSegments + (1+segClass.Index) * segmentSeperation,yPosSegments,0);
+        Debug.Log(xPosSegments + (1+segClass.Index) * segmentSeperation);
+        segments.Add(new float[x,y]);
+        SetSegment(segClass.Index);
+        curSegment = segClass.Index;
+    }
+
+public void SwitchSegment(int segment)
+    {
+        curSegment = segment+1;
+        amplitudes = segments[segment];
+        Debug.Log("switching segment to " + segment);
+        for (int i = 0; i< x; i++)
+        {
+            for (int j = 0; j <y; j++)
+            {
+                cells[i,j].amplitude = amplitudes[i,j];
+                cells[i,j].UpdateVisual();
+            }
+        }
+    }
 
 float timer = 0;
 void Update()

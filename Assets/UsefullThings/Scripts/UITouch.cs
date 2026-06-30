@@ -39,6 +39,10 @@ public class UITouch : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
             cell = hit.collider.GetComponent<DrumCell>();
             if (cell != null)
                 cell.OnClick();
+            if (hit.collider.tag == "Segment")
+                {
+                    drumRoll.SwitchSegment(hit.collider.GetComponent<Segment>().Index);
+                }
         }
     }
     }
