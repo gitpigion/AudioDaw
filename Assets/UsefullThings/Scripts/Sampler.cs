@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -8,7 +9,7 @@ public class Sampler : AudioPull
     // plays samples given in it via setting them into noisy buffers
     // mono because thats cooler
 
-    public AudioClip[] Clips;
+    public AudioClip[] Clips = new AudioClip[0];
     private float[][] buffers;
 
     int bufferSize;
@@ -22,7 +23,7 @@ public class Sampler : AudioPull
 
 
 
-    public void SetSamples(int[] sampleHits)
+    public override void Play(int[] sampleHits)
     {
         incomingSamples = new Sample[sampleHits.Length];
         for (int i = 0; i< sampleHits.Length; i++)
@@ -35,7 +36,7 @@ public class Sampler : AudioPull
 
 
     // turns alllll the wav files given into usable buffers
-    public void Init()
+    public override void Init()
     {
         buffers = new float[Clips.Length][];
         for (int i = 0; i < Clips.Length; i++ ) buffers[i] = setToBuffer(Clips[i]);
@@ -67,10 +68,14 @@ public class Sampler : AudioPull
     // new samples? great lets add them
     void CheckForNewSamples()
     {
-        foreach (Sample sample in incomingSamples)
+        if (incomingSamples != null)
+        {
+            foreach (Sample sample in incomingSamples)
         {
             playingSamples.Add(sample);
         }
+        }
+        
 
     }
     
@@ -81,9 +86,11 @@ public class Sampler : AudioPull
     // because it is in a class it can be moved around in the list seamlessly
      public override float[] Pull(int framesRequested)
     {
-        CheckForNewSamples();
-
         float[] buffer = new float[framesRequested];
+        CheckForNewSamples();
+        if (Clips.Length == 1) return buffer;
+
+        
 
         
         for (int curSample = 0; curSample < playingSamples.Count; curSample++)

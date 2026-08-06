@@ -29,11 +29,12 @@ public class Manager : MonoBehaviour
         GameObject waveObject = Instantiate(prefab);
 
         // class that just exists to have all 3 vairables in one, might change later if i hate it
-
+        
         SoundMaster soundMaster = new SoundMaster(wave, waveObject, waveObject.GetComponent<AudioMidi>(), AudioMidi.Stage.Synth);
         Sounds.Add(soundMaster);
         drumRoll.AddSound(soundMaster);
         masterSend.Pulls.Add(wave);
+        Debug.Log("created synth");
     }
 
     public void CreateSamplerGameObject()
@@ -45,7 +46,7 @@ public class Manager : MonoBehaviour
         Sounds.Add(soundMaster);
         drumRoll.AddSound(soundMaster);
         masterSend.Pulls.Add(sampler);
-
+        Debug.Log("created drums");
     }
 
     public void Link(AudioPull input, AudioPull output)
@@ -63,7 +64,7 @@ public class Manager : MonoBehaviour
         source.Play();
         CreateSoundGameObject();
         CreateSoundGameObject();
-        CreateSamplerGameObject();
+        //CreateSamplerGameObject();
         // testing
         
 

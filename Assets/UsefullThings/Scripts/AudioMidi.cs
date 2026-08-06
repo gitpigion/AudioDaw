@@ -27,7 +27,7 @@ public class AudioMidi : MonoBehaviour
         switch (stage)
         {
             case Stage.Synth:
-            audioPull.Play(amplitudes, frequencies, lengths, bpm);
+            audioPull.Play(frequencies, amplitudes, lengths, bpm);
             break;
             
             case Stage.Drums:
