@@ -2,22 +2,40 @@ using UnityEngine;
 
 public class AudioMidi : MonoBehaviour
 {
-    WaveMaker waveMaker;
+    AudioPull audioPull;
     public int bpm = 120;
 
     public void SetWave(WaveMaker wave)
     {
-        waveMaker = wave;
-        waveMaker.Init();
+        audioPull = wave;
+        audioPull.Init();
     }
 
-    public void Play(float[] amplitudes, float[] frequencies, float[] lengths)
+    public void SetAudio(AudioPull pull, Stage stage)
     {
-        waveMaker.SetFrequency(frequencies, amplitudes, lengths, bpm);
+        this.stage = stage;
+        audioPull = pull;
+        audioPull.Init();
     }
 
-    public void NoteOff()
+    public enum Stage{Synth, Drums}
+    public Stage stage;
+    
+
+    public void Play(float[] amplitudes, float[] frequencies, float[] lengths, int[] samples)
     {
-        waveMaker.NoteOff();
+        switch (stage)
+        {
+            case Stage.Synth:
+            audioPull.Play(amplitudes, frequencies, lengths, bpm);
+            break;
+            
+            case Stage.Drums:
+            audioPull.Play(samples);
+            break;
+        }
+        
     }
+
+ 
 }

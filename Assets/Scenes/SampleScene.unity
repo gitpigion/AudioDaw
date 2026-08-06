@@ -636,6 +636,7 @@ MonoBehaviour:
   audioMidis: []
   cellPrefab: {fileID: 3835258658184174524, guid: 5ccca79759be34838a711f1e3249a5c4, type: 3}
   segmentPrefab: {fileID: 6280355172336028610, guid: 679c013839c5d4272bc42aaea53b2934, type: 3}
+  instrumentPrefab: {fileID: 3759879895868613664, guid: 0e492254187f04758b90b5210d9d12e6, type: 3}
   y: 12
   x: 20
   bpm: 120
@@ -646,7 +647,11 @@ MonoBehaviour:
   xPosSegments: -3.8
   yPosSegments: 3.84
   segmentSeperation: 2
+  xPosInstruments: 4.2
+  yPosInstruments: 0
+  instrumentSeperation: 1.89
   squashValueX: 0
+  StartingSegmentCount: 2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -19,7 +19,8 @@ public class WaveMaker : AudioPull
     private readonly object lockObj = new object();
     private bool hasNewFrequencies = false;
 
-    public void Init()
+//  sets sample rate settings based of whats im unity and buffer size
+    public override void Init()
 {
     sampleRate = AudioSettings.outputSampleRate;
     AudioSettings.GetDSPBufferSize(out int bufferSize, out _);
@@ -27,7 +28,9 @@ public class WaveMaker : AudioPull
 }
 
     // length is in beats, bpm needed to convert to samples
-    public void SetFrequency(float[] f, float[] amps, float[] lengths, float bpm)
+    // sets target frequncies to be set as soon as buffer over
+    // sets length of notes as countdowns
+    public override void Play(float[] f, float[] amps, float[] lengths, float bpm)
     {
         int[] countdowns = new int[f.Length];
         for (int i = 0; i < f.Length; i++)
@@ -45,6 +48,8 @@ public class WaveMaker : AudioPull
         }
     }
 
+
+    // if new frequncies, great! sets them all up
     void CheckForNewFrequencies()
     {
         lock (lockObj)
@@ -58,6 +63,10 @@ public class WaveMaker : AudioPull
         }
     }
 
+
+    // first, check if notes are siilar! if so then set same phase
+    // then crete new envelopes for everyone
+    // then set no new frequncies!
     void ApplyFrequencyChange()
     {
         float[] newPhases = new float[pendingFrequencies.Length];
@@ -97,12 +106,19 @@ public class WaveMaker : AudioPull
         pendingFrequencyChange = false;
     }
 
+    // for all the notes, stop them!
     public void NoteOff()
     {
         foreach (Envelope env in envelopes)
             env.NoteOff();
     }
 
+    // needed as part of abstract class
+    // clears buffer
+    // if gettingg a new note, quickly fades out old frequncy to prevent clicks
+    // when faded out sets new frequncys
+    // then for each note, play them for length given to wave in package, if off turn that note off!
+    // process every envelope increment phase and then send off to buffer :)
     public override float[] Pull(int framesRequested)
     {
         CheckForNewFrequencies();
@@ -151,6 +167,11 @@ public class WaveMaker : AudioPull
         return buffer;
     }
 }
+
+// millions of these bad boys
+// can be attacking decaying sustaining releasing
+// goes from one to other
+// mess with these settings to change synth tone
 public class Envelope
 {
     public float amplitude = 1f;

@@ -28,6 +28,7 @@ public class MasterSend : MonoBehaviour
 
     void OnAudioFilterRead(float[] data, int channels)
 {
+    Debug.Log(Pulls.Count);
     int framesRequested = data.Length / channels;
 
     for (int i = 0; i < data.Length; i++)
@@ -35,11 +36,11 @@ public class MasterSend : MonoBehaviour
 
     foreach (AudioPull pull in Pulls)
     {
-        float[] pulled = pull.Pull(framesRequested); // reuses pre-allocated buffer now
+        float[] pulled = pull.Pull(framesRequested); 
 
         for (int i = 0; i < framesRequested; i++)
             for (int c = 0; c < channels; c++)
-                data[i * channels + c] += pulled[i];
+                data[i * channels + c] += pulled[i]/Pulls.Count;
     }
 }
 

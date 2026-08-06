@@ -1,6 +1,7 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEditor.SceneManagement;
 
 public class Manager : MonoBehaviour
 {
@@ -29,9 +30,22 @@ public class Manager : MonoBehaviour
 
         // class that just exists to have all 3 vairables in one, might change later if i hate it
 
-        SoundMaster soundMaster = new SoundMaster(wave, waveObject, waveObject.GetComponent<AudioMidi>());
+        SoundMaster soundMaster = new SoundMaster(wave, waveObject, waveObject.GetComponent<AudioMidi>(), AudioMidi.Stage.Synth);
         Sounds.Add(soundMaster);
         drumRoll.AddSound(soundMaster);
+        masterSend.Pulls.Add(wave);
+    }
+
+    public void CreateSamplerGameObject()
+    {
+        Sampler sampler = new Sampler();
+        GameObject sampleObject = Instantiate(prefab);
+
+        SoundMaster soundMaster = new SoundMaster(sampler, sampleObject, sampleObject.GetComponent<AudioMidi>(), AudioMidi.Stage.Drums);
+        Sounds.Add(soundMaster);
+        drumRoll.AddSound(soundMaster);
+        masterSend.Pulls.Add(sampler);
+
     }
 
     public void Link(AudioPull input, AudioPull output)
@@ -48,8 +62,10 @@ public class Manager : MonoBehaviour
         source.loop = true;
         source.Play();
         CreateSoundGameObject();
+        CreateSoundGameObject();
+        CreateSamplerGameObject();
         // testing
-        masterSend.Pulls.Add(Sounds[0].waveMaker);
+        
 
         
     }
@@ -59,15 +75,15 @@ public class Manager : MonoBehaviour
 [System.Serializable]
 public class SoundMaster
 {
-    public WaveMaker waveMaker;
+    public AudioPull AudioPull;
     public GameObject gameObject;
     public AudioMidi audioMidi;
 
-    public SoundMaster(WaveMaker waveMaker, GameObject gameObject, AudioMidi audioMidi)
+    public SoundMaster(AudioPull waveMaker, GameObject gameObject, AudioMidi audioMidi, AudioMidi.Stage stage)
     {
-        this.waveMaker = waveMaker;
+        this.AudioPull = waveMaker;
         this.gameObject = gameObject;
         this.audioMidi = audioMidi;
-        audioMidi.SetWave(waveMaker);
+        audioMidi.SetAudio(waveMaker, stage);
     }
 }

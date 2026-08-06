@@ -71,6 +71,5 @@ public class DrumCell : MonoBehaviour
         rect.localScale = new Vector2 (1, amplitude);
         rect.anchoredPosition = new Vector2(initialPos.x, initialPos.y + amplitude/2 -0.5f);
         drumRoll.SetCell(row, col, amplitude);
-        Debug.Log(math.abs(amplitude* (1- amplitude)));
     }
 }

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+    using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -29,6 +29,8 @@ public GameObject cellPrefab;
 
 public GameObject segmentPrefab;
 
+public GameObject instrumentPrefab;
+
 public int y = 8;
 public int x = 20;
 
@@ -44,30 +46,55 @@ public Vector3 LineEndPoint;
 public Vector3 LineStartPoint;
 
 UITouch uI;
-
-float [,] amplitudes;
+//      larger array for each instrument
+float [][,] amplitudes;
 float [,] lengths;
 DrumCell [,] cells;
 
-public List<float[,]> segments;
 
 List<GameObject> segmentObjs;
-List<Segment> segmentClasses;
+List<Segment> segmentClasses; // only list as each segment has arrays
+
+List<GameObject> instrumentObjs;
+List<Instrument> instrumentClasses;
+
+int amountOfSegments=0;
+int amountOfInstruments;
+
+Segment[][] InstrumentsSegments;
+// this list will be same length as audio midis
+// this will be updated with an array of empty segments when a new instrument is made
 
 int curSegment;
+int curInstrument;
 
 public float xPosSegments;
 public float yPosSegments;
 
 public float segmentSeperation;
 
+public float xPosInstruments;
+public float yPosInstruments;
+
+public float instrumentSeperation;
+
 
 public float squashValueX;
+
+public int StartingSegmentCount = 2;
 float squashValueY;
 
 float moveX = 0;
 float moveY = 0;
-void Start()
+
+    void Awake()
+    {
+        segmentClasses = new List<Segment>();
+        segmentObjs = new List<GameObject>();
+        instrumentClasses = new List<Instrument>();
+        instrumentObjs = new List<GameObject>();
+    }
+    void Start()
 {   
     moveX = transform.position.x;
     moveY = transform.position.y;
@@ -83,8 +110,7 @@ void Start()
     uI.Init(squashValueX, this);
 
 
-    segmentObjs = new List<GameObject>();
-    segmentClasses = new List<Segment>();
+    
 
     Line = Instantiate<GameObject>(LineGameObject).GetComponent<LineRenderer>();
     Line.   sortingOrder = 5;
@@ -92,18 +118,20 @@ void Start()
     Line.SetPosition(0, LineStartPoint);
     Line.SetPosition(1, LineEndPoint);
     resetLine();
-    amplitudes = new float[x,y];
+    
     cells = new DrumCell[x,y];
+    
     CreateRoll();
-    segments = new List<float[,]>();
-    CreateSegments();
-    CreateSegments();
-    CreateSegments();
+    
+    for (int i = 0; i < StartingSegmentCount; i++)
+        {
+            CreateSegment();
+        }
    
 }
 
 
-public void CreateRoll(float[,] amplitudes = null)
+public void CreateRoll(float[][,] amplitudes = null)
     {
         if (amplitudes != null)
         {
@@ -125,72 +153,179 @@ public void CreateRoll(float[,] amplitudes = null)
     }
     }
 
-public void SetCell(int row, int col, float amplitude)
+
+//     handy way to set any value anywhere! setting -1 on segment or instrument will set them to defualt values
+public void SetCell(int row, int col, float amplitude, int Segment = -1, int Instrument = -1)
 {
-    amplitudes[col, row] = amplitude;
-    UpdateSegment();
+    if (Instrument == -1)
+        {
+            Instrument = curInstrument;
+        }
+    if (Segment == -1)
+        {
+            Segment = curSegment;
+        }
+
+    amplitudes[Instrument][col, row] = amplitude;
+    UpdateSegment(amplitudes[Instrument], Segment, Instrument); 
+    
 }
 
+
+//      adds a soundmaster to audiomidis
+//      gets each segment to make a new instrument
+//      creates an instrument button prefab
 public void AddSound(SoundMaster soundMaster)
 {
     audioMidis.Add(soundMaster.audioMidi);
+    amountOfInstruments++;
+
+    // If there are no segments yet, make one first
+    if (segmentClasses.Count == 0)
+    {
+        CreateSegment();
+    }
+
+    // Tell every segment to add a new instrument layer
+    foreach (Segment segment in segmentClasses)
+    {
+        segment.AddInstrument(x, y);
+        
+    }
+    if (amountOfInstruments ==1)
+        {
+            amplitudes = new float[1][,];
+            amplitudes[0] = new float [x,y];
+        }
+    else
+    {
+
+        float [][,] newAmps = new float[amplitudes.Length+1][,];
+        for (int i = 0; i < amplitudes.Length; i++)
+        {
+            newAmps[i] = amplitudes[i];
+        }   
+        newAmps[amplitudes.Length] = new float[x,y];
+        amplitudes = newAmps;
+        }
+    
+
+    // Create instrument button UI
+    CreateInstrument(soundMaster);
 }
 
-void SetSegment(int segement)
-    {
-        segments[segement] = new float[x,y];
-    }
+//      creates an instrument button, positions it vertically, sets index
+void CreateInstrument(SoundMaster soundMaster)
+{
+    GameObject instObj = Instantiate(instrumentPrefab);
+    Instrument instClass = instObj.GetComponent<Instrument>();
+    
+    instrumentObjs.Add(instObj);
+    instrumentClasses.Add(instClass);
 
-public void UpdateSegment()
-    {
-        segments[curSegment-1] = amplitudes;
-    }
+    instClass.Index = amountOfInstruments - 1;
+    instClass.soundMaster = soundMaster;
+    
+    instObj.transform.position = new Vector3(
+        xPosInstruments, 
+        yPosInstruments + (1 + instClass.Index) * instrumentSeperation, 
+        0);
+}
 
-void CreateSegments()
-    {
+//      allows any segment to be updated with new amps
+public void UpdateSegment(float [,] newamplitudes, int Segment, int Instrument)
+{
+    segmentClasses[Segment].amps[Instrument] = newamplitudes;
+}
 
+
+//      increases amount of segments vairable at the END so that it starts at position 0,
+//  instantiates a segment gameobject, gets the segment class on the gameobeject
+//      sets index on segment, sets position of segment on screen, adds instruments for each instrument
+void CreateSegment()
+    {
+        
+        
         GameObject seg = Instantiate(segmentPrefab);
+
         Segment segClass;
         segmentObjs.Add(seg);
         segClass = seg.GetComponent<Segment>();
         segmentClasses.Add(segClass);
-        segClass.Index = segments.Count;
+
+        segClass.Index = amountOfSegments;
         seg.transform.position = new Vector3 (xPosSegments + (1+segClass.Index) * segmentSeperation,yPosSegments,0);
-        Debug.Log(xPosSegments + (1+segClass.Index) * segmentSeperation);
-        segments.Add(new float[x,y]);
-        SetSegment(segClass.Index);
+
+        for (int i = 0; i < amountOfInstruments; i++)
+        {
+            segClass.AddInstrument(x,y);
+        }
+
         curSegment = segClass.Index;
+        amountOfSegments++;
     }
 
+
+//      sets current segment,changes the amplitudes for each instrument in the segment
+//      changes the amplitudes of the cells and updates the visual to match
 public void SwitchSegment(int segment)
     {
-        curSegment = segment+1;
-        amplitudes = segments[segment];
-        Debug.Log("switching segment to " + segment);
+        curSegment = segment;
+        for (int i = 0; i < amountOfInstruments; i++)
+        {
+            amplitudes[i] = segmentClasses[curSegment].amps[i];
+        }
+        
+        Debug.Log("switching segment to " + segment + " on instrument " + curInstrument);
         for (int i = 0; i< x; i++)
         {
             for (int j = 0; j <y; j++)
             {
-                cells[i,j].amplitude = amplitudes[i,j];
-                cells[i,j].UpdateVisual();
+                cells[i,j].amplitude = amplitudes[curInstrument][i,j];
+                cells[i,j].UpdateVisual(); 
             }
         }
     }
 
+//      sets current instrument, changes the amplitudes displayed in the drum roll
+public void SwitchInstrument(int instrument)
+{
+    curInstrument = instrument;
+    
+    Debug.Log("switching segment to " + curSegment + " on instrument " + instrument);
+    for (int i = 0; i < x; i++)
+    {
+        for (int j = 0; j < y; j++)
+        {
+            cells[i, j].amplitude = amplitudes[curInstrument][i, j];
+            cells[i, j].UpdateVisual();
+        }
+    }
+}
+
 float timer = 0;
+
+//      moves line visual, if its time for a new beat, loops through all instruments and plays the notes on the accociated midis
 void Update()
 {
     Line.transform.position = new Vector3 (Line.transform.position.x +( Time.deltaTime/(60f/bpm))*squashValueX, 
-    Line.transform.position.y,
-    Line.transform.position.z);
+    Line.transform.position.y, Line.transform.position.z);
     timer += Time.deltaTime;
     if (timer >= 60f/bpm )
         {
             timer = 0;
-            CallMidis(audioMidis[0]);
+            for (int i = 0; i < amountOfInstruments; i++)
+            {
+                CallMidis(audioMidis[i], i);
+            }
+            loopPosition++;
+        if (loopPosition >= x)
+        {
+            loopPosition = 0;
+            resetLine();
         }
-
-    // in DrumRoll Update instead of OnMouseDown on each cell
+            
+        }
     
 }
 
@@ -198,18 +333,24 @@ private float[] compNoteBatch = new float[0];
 private float[] compAmpBatch = new float[0];
 private float[] compLengthBatch = new float[0];
 
-void CallMidis(AudioMidi midi)
+
+//      makes lits, for each note in the vertical strip that beat, sets amplitudes of selected instrument equal to the saved amplitudes
+//      same with length, and then adds frequency amps and lengths to lists.
+//      these are set to arrays and then they are sent off to midi, if the beat has reached the end of the line it resets
+void CallMidis(AudioMidi midi, int Instrument)
     {
 
         List<float> noteBatch = new List<float>();
+        List<int> sampleBatch = new List<int>();
         List<float> ampBatch = new List<float>();
         List<float> lengthBatch = new List<float>();
         for (int i = 0; i < y; i++)
         {
-            float amplitude = amplitudes[loopPosition, i];
+            float amplitude = amplitudes[Instrument][loopPosition, i];
             float length = cells[loopPosition, i].noteLength;
             if (amplitude >0)
             {
+                sampleBatch.Add(i);
                 noteBatch.Add(NoteTable.GetFrequency(i));
                 ampBatch.Add(amplitude);
                 lengthBatch.Add(length);
@@ -222,15 +363,10 @@ void CallMidis(AudioMidi midi)
         compLengthBatch = lengthBatch.ToArray();
         if (compNoteBatch.Length >0 )
         {
-            midi.Play(compAmpBatch, compNoteBatch, compLengthBatch);   
+            midi.Play(compAmpBatch, compNoteBatch, compLengthBatch, sampleBatch.ToArray());   
         }
         
-        loopPosition++;
-        if (loopPosition >= x)
-        {
-            loopPosition = 0;
-            resetLine();
-        }
+        
 
     }
 

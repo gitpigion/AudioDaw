@@ -43,6 +43,10 @@ public class UITouch : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragH
                 {
                     drumRoll.SwitchSegment(hit.collider.GetComponent<Segment>().Index);
                 }
+            if (hit.collider.tag == "Instrument")
+                {
+                    drumRoll.SwitchInstrument(hit.collider.GetComponent<Instrument>().Index);
+                }
         }
     }
     }
