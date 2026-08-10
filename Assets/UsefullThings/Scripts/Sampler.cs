@@ -12,6 +12,8 @@ public class Sampler : AudioPull
     public AudioClip[] Clips = new AudioClip[0];
     private float[][] buffers;
 
+    private readonly object lockObj = new object();
+
     int bufferSize;
     int sampleRate;
 
@@ -22,16 +24,34 @@ public class Sampler : AudioPull
 
 
 
-
+    //is given all the samples to trigger
+    // sets incoming samples to an aray of new samples
+    // for each incoming sample
     public override void Play(int[] sampleHits)
     {
-        incomingSamples = new Sample[sampleHits.Length];
+        
+
+        lock(lockObj)
+        {
+            List<Sample> incomingSamplesTemp = new List<Sample>();
         for (int i = 0; i< sampleHits.Length; i++)
         {
+            if (sampleHits[i] < buffers.Length)
+                {
+                     Debug.Log("attempting to play sample at position " + sampleHits[i]);
             Sample buffy = new Sample();
-            buffy.buffer = buffers[i];
-            incomingSamples[i] = buffy;
+            buffy.buffer = buffers[sampleHits[i]];
+            Debug.Log(incomingSamples);
+            Debug.Log(buffy);
+            incomingSamplesTemp.Add(buffy);
+                }
+                else break;
+           
         }
+
+        incomingSamples = incomingSamplesTemp.ToArray();
+        }
+        
     }
 
 
@@ -43,6 +63,21 @@ public class Sampler : AudioPull
         playingSamples = new List<Sample>();
         sampleRate = AudioSettings.outputSampleRate;
         AudioSettings.GetDSPBufferSize(out bufferSize, out _);
+    }
+
+
+    public void AddSample(AudioClip clip)
+    {
+        float[][] newBuffers = new float[buffers.Length+1][];
+        for (int i = 0; i < buffers.Length; i++)
+        {
+            newBuffers[i] = buffers[i];
+        }
+        Debug.Log("current amount of samples " + newBuffers.Length);
+
+        newBuffers[buffers.Length] = setToBuffer(clip);
+
+        buffers = newBuffers;
     }
 
     float[] setToBuffer(AudioClip clip)
@@ -59,9 +94,11 @@ public class Sampler : AudioPull
                 monoBuffer[i] = buffer[i * clip.channels];
                 // itll be a wonder if this actualy works
             }
+            Debug.Log("created sample with size " + buffer.Length);
             return monoBuffer;
         }
 
+        
         return buffer;
     }
 
@@ -73,6 +110,7 @@ public class Sampler : AudioPull
             foreach (Sample sample in incomingSamples)
         {
             playingSamples.Add(sample);
+            incomingSamples = null;
         }
         }
         
@@ -84,24 +122,27 @@ public class Sampler : AudioPull
     // each sample can be stored in a class called sample!!!!
     // in this sample class they have the pleasure of containg the full sample, the increment, and amplitude
     // because it is in a class it can be moved around in the list seamlessly
-     public override float[] Pull(int framesRequested)
+    public override float[] Pull(int framesRequested)
     {
         float[] buffer = new float[framesRequested];
         CheckForNewSamples();
-        if (Clips.Length == 1) return buffer;
+        Debug.Log("there are currently " + buffers.Length + " buffers");
+        if (buffers.Length == 0) return buffer;
+        if (playingSamples.Count == 0) return buffer;
 
-        
+        Debug.Log("attempting to play sample" + playingSamples.Count);
 
         
         for (int curSample = 0; curSample < playingSamples.Count; curSample++)
         {
             for (int i = 0; i < framesRequested; i++)
             {
-                buffer[i] += playingSamples[curSample].GetBuffer(i) / playingSamples.Count;
+                buffer[i] += playingSamples[curSample].GetBuffer(i); // playingSamples.Count;
             }
             playingSamples[curSample].Increment(framesRequested);
-            if (playingSamples[curSample].DestructCheck())
+            if (playingSamples[curSample].DestructCheck)
             {
+                Debug.Log("getting rid of sample at position " + curSample);
                 playingSamples.Remove(playingSamples[curSample]);
             }
 
@@ -129,13 +170,21 @@ public class Sample
 
     public float GetBuffer(int i)
     {
-        return buffer[i+ position];
+        if ( i+position < buffer.Length)
+        {
+            return buffer[i+ position];
+        }
+        else
+        {
+            DestructCheck = true;
+            return 0;
+            
+        }
+        
     }
 
-    public bool DestructCheck()
-    {
-        return position == buffer.Length;
-    }
+    public bool DestructCheck = false;
+  
 
 
     

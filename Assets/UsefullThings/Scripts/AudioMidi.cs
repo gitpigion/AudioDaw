@@ -31,6 +31,7 @@ public class AudioMidi : MonoBehaviour
             break;
             
             case Stage.Drums:
+            
             audioPull.Play(samples);
             break;
         }

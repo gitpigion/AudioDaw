@@ -477,6 +477,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Manager
   audioBuses: []
+  drum1SamplesTest:
+  - {fileID: 8300000, guid: ab473ec74d7c44aa183f6a7fdadcf528, type: 3}
+  - {fileID: 8300000, guid: 3088bda6766df4b5580269baf4655014, type: 3}
+  - {fileID: 8300000, guid: 27753b82f3f774b5b9a40ff7774b9568, type: 3}
   Sounds: []
   channels: 0
   prefab: {fileID: 8375035807210009061, guid: 4c35a316febd44d029f5e0fc5cf5c455, type: 3}
@@ -639,7 +643,7 @@ MonoBehaviour:
   instrumentPrefab: {fileID: 3759879895868613664, guid: 0e492254187f04758b90b5210d9d12e6, type: 3}
   y: 12
   x: 20
-  bpm: 120
+  bpm: 300
   loopSize: 0
   LineGameObject: {fileID: 1672617471979675701, guid: 1dd3ee1e9cbd844bc9460755108186b6, type: 3}
   LineEndPoint: {x: 0, y: 0, z: 0}
@@ -648,7 +652,7 @@ MonoBehaviour:
   yPosSegments: 3.84
   segmentSeperation: 2
   xPosInstruments: 4.2
-  yPosInstruments: 0
+  yPosInstruments: -2.65
   instrumentSeperation: 1.89
   squashValueX: 0
   StartingSegmentCount: 2

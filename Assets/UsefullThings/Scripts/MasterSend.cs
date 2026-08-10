@@ -28,7 +28,7 @@ public class MasterSend : MonoBehaviour
 
     void OnAudioFilterRead(float[] data, int channels)
 {
-    Debug.Log(Pulls.Count);
+    //Debug.Log("there are " + Pulls.Count + " pulls");
     int framesRequested = data.Length / channels;
 
     for (int i = 0; i < data.Length; i++)

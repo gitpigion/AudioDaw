@@ -7,6 +7,8 @@ public class Manager : MonoBehaviour
 {
     public List<AudioBus> audioBuses;
 
+    public List<AudioClip> drum1SamplesTest;
+
     public List<SoundMaster> Sounds;
 
     public int channels;
@@ -47,6 +49,11 @@ public class Manager : MonoBehaviour
         drumRoll.AddSound(soundMaster);
         masterSend.Pulls.Add(sampler);
         Debug.Log("created drums");
+        foreach (AudioClip clip in drum1SamplesTest)
+        {
+            Debug.Log("attempting to add" + clip);
+            sampler.AddSample(clip);
+        }
     }
 
     public void Link(AudioPull input, AudioPull output)
@@ -64,7 +71,9 @@ public class Manager : MonoBehaviour
         source.Play();
         CreateSoundGameObject();
         CreateSoundGameObject();
-        //CreateSamplerGameObject();
+        CreateSamplerGameObject();
+
+        
         // testing
         
 
