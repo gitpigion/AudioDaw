@@ -3,6 +3,14 @@ using System.Linq;
 
 public class MusicLookup : MonoBehaviour
 {
+    float[] averageBrightness;
+    float[] averageDifference;
+    float[][] averageRGB;
+
+    int bpm;
+
+    lookupTable lookupTable;
+
     // matches music information to the video data
     // Create BPM and groups
     //Major groups: change in video
@@ -139,16 +147,30 @@ public class MusicLookup : MonoBehaviour
     {
         PeakData[] peaks = new PeakData[5];
 
+        lookupTable = new lookupTable();
+
         videoData = new ReadVideo();
-        peaks[0] = slice(videoData.avgBrightness.ToArray(), 10);
-        peaks[1] = slice(videoData.avgDifference.ToArray(), 10);
+        averageBrightness = videoData.avgBrightness.ToArray();
+        averageDifference = videoData.avgDifference.ToArray();
+        averageRGB = new float[videoData.avgRGB.Count][];
+        for (int i = 0; i < videoData.avgRGB.Count; i++)
+        {
+            averageRGB[i] = new float[3];
+            for (int j = 0; j < 3; j++)
+            {
+                averageRGB[i][j] = videoData.avgRGB[i][j];
+            }
+        }
+
+        peaks[0] = slice(averageBrightness, 10);
+        peaks[1] = slice(averageDifference, 10);
         for (int i = 0; i < 3; i++)
         {
-            peaks[2 + i] = slice(videoData.avgRGB.Select(x => (float)x[i]).ToArray(), 10);
+            peaks[2 + i] = slice(averageRGB.Select(x => x[i]).ToArray(), 10);
         }
 
         float[] weights = new float[5] { 1f, 1f, 1f, 1f, 1f };
-        int dataLength = videoData.avgBrightness.Count;
+        int dataLength = averageBrightness.Length;
          float[] handledData = new float[dataLength];
         for (int i = 0; i < peaks.Length; i++)
         {
@@ -160,9 +182,130 @@ public class MusicLookup : MonoBehaviour
         PeakData finalPeaks = slice(handledData, 10);
     }
 
-    // Update is called once per frame
-    void Update()
+
+    void createBPM()
     {
-        
+        // this function will take the final peak data and create a BPM value for the video
+        // it will use the distance between the peaks to determine the BPM
+        // it will also use the average brightness and color values to determine the BPM
+        // it will return a BPM value that can be used to match music to the video
+        // then it will adjust peak data to match bpm, and form minor groups
+
+        float brightnessBPM = avgBrightness.Average();
+
+        brightnessBPM = brightnessBPM /255f * 120 + 60; // scale to 60-180 bpm
+
+        bpm = Mathf.RoundToInt(brightnessBPM);
+
+
+        int beatsPerBar = 4; // 4/4
+        // int beatsPerBar = 3; // 3/4
+
+        float barDuration = beatDuration * beatsPerBar;
+
+
+        float beatDuration = 60f / bpm;
+
+        // snaps peaks to bpm
+        for (int i = 0; i < finalPeaks.indexes.Length; i++)
+        {
+            float peakTime = finalPeaks.indexes[i] * (1f / 30f); // assuming 30 fps
+            
+            float beatNumber = Mathf.Round(peakTime / beatDuration);
+            float snappedTime = beatNumber * beatDuration;
+            finalPeaks.values[i] = snappedTime;
+        }
+
     }
+
+
+
+   
+    void BuildChord()
+    {
+        // this function will be recurred
+        // it will loop through each major group and find the chord gradients (chords at each slice
+        // influenced by nearbyslices) then move to next major group with a high weight on previous key
+
+        // after the function has finished, it will reccur again
+        // taking the chord gradient and minor groups it will attempt to create a progression in each major group
+        // this should mean, very short major groups will have a sinle chord, and longer groups will have progressions
+
+
+        List<string[]>[] chordPositions = new List<string[]>[finalPeaks.indexes.Length];
+        List<string[]>[] chordTypes = new List<string[]>[finalPeaks.indexes.Length];
+
+        for (int i = 0; i < finalPeaks.indexes.Length; i++)
+        {
+            // find the chord gradients for each major group
+            // then move to next major group with a high weight on previous key
+
+            List<string[]> chordForMajorGroup = new List<string[]>();
+            List<string[]> positionsForMajorGroup = new List<string[]>();
+
+            int index = 0;
+
+            for (int j = index; j < finalPeaks.indexes.Length; j++)
+            {
+                lookupTable.publicChordLookup();
+                index = j;
+                chordForMajorGroup.Add(lookupTable.chordWeights);
+                positionsForMajorGroup.Add(lookupTable.chordPositions);
+                if (j < finalPeaks.indexes[i])
+                {
+                    break;
+                }
+                // breaks when over with group
+            }
+
+            chordPositions[i] = chordForMajorGroup.ToArray();
+            chordTypes[i] = positionsForMajorGroup.ToArray();
+        }
+        // finishes with arrays for each major group full of chord gradients
+
+
+
+    }
+
+    void RecurChord(string[][][] chordPositions, string[][][] chordTypes)
+    {
+        // this function will be recurred
+        // it will loop through each major group and find the chord gradients (chords at each slice
+        // influenced by nearbyslices) then move to next major group with a high weight on previous key
+
+        // after the function has finished, it will reccur again
+        // taking the chord gradient and minor groups it will attempt to create a progression in each major group
+        // this should mean, very short major groups will have a sinle chord, and longer groups will have progressions
+
+
+        for (int i = 0; i < chordPositions.Length; i++)
+        {
+            // find the chord gradients for each major group
+            // then move to next major group with a high weight on previous key
+
+            
+
+            int index = 0;
+
+             for (int j = index; j < finalPeaks.indexes.Length; j++)
+            {
+                lookupTable.publicChordLookup();
+                index = j;
+                chordPositions[i][j-index] = lookupTable.chordPositions;
+                chordTypes[i][j-index] = lookupTable.chordWeights;
+                if (j < finalPeaks.indexes[i])
+                {
+                    break;
+                }
+                // breaks when over with group
+            }
+
+            chordPositions[i] = chordForMajorGroup.ToArray();
+            chordTypes[i] = positionsForMajorGroup.ToArray();
+        }
+
+    }
+
+
+
 }
