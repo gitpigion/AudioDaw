@@ -26,14 +26,16 @@ public class MusicLookup : MonoBehaviour
 
     //Major groups will be able to add modifiers like, making one side major and other minor in example.
 
-    readVideo videoData;
+    ReadVideo videoData;
 
-    void slice(float[] handledData, float threshold)
+    PeakData slice(float[] handledData, int threshold)
     {
         // This function will handle slicing the video data and analyzing it for music matching
         // uses an algorithim to determine peaks based off of 
-        // avaerage brightness and color values, and then uses these peaks to determine the best matching music for the video.
-        // called 5 times for r,g,b,brightness and difference, and then the results are combined to create a final result.
+        // avaerage brightness and color values, and then uses these peaks to determine the best
+        //  matching music for the video.
+        // called 5 times for r,g,b,brightness and difference, and then the results are combined to 
+        // create a final result.
         // uses an arbitrary number to control how many slices should be in a value of time
         // combines the 5 values and threshold to form groups
 
@@ -50,6 +52,8 @@ public class MusicLookup : MonoBehaviour
 
         float[] curDifference = new float[handledData.Length];
         float[] groupDistance = new float[handledData.Length];
+
+        float[] maxDistances = new float[threshold];
         
 
         for (int i = 0; i < handledData.Length; i++)
@@ -101,15 +105,59 @@ public class MusicLookup : MonoBehaviour
 
             // set the maxIndex to 0 so it won't be considered in the next iteration
             groupDistance[maxIndex] = 0;
+            maxDistances[i] = maxGroupDistance;
         }
-       
+        
+
+        return new PeakData(peakIndexes, maxDistances);
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    public struct PeakData
+    {
+        public int[] indexes;
+        public float[] values;
+
+        public PeakData(int[] index, float[] value)
+        {
+            this.indexes = index;
+            this.values = value;
+        }
+    }
+
+    // takes all the peaks and returns final peak data
+    // this will be an avaerage of all the peaks with weights attached to each peak based on 
+    // the value of the peak, and the distance between the peaks`
+    // weights are R,G,B,brightness,difference
+
+    // very similar to slice, but with much smaller data set
+    // multiplies the values of each peak by the weight of that peak
+   
+
+    // slices each of the 5 values and returns the peak data
     void Start()
     {
+        PeakData[] peaks = new PeakData[5];
+
         videoData = new ReadVideo();
-        slice();
+        peaks[0] = slice(videoData.avgBrightness.ToArray(), 10);
+        peaks[1] = slice(videoData.avgDifference.ToArray(), 10);
+        for (int i = 0; i < 3; i++)
+        {
+            peaks[2 + i] = slice(videoData.avgRGB.Select(x => (float)x[i]).ToArray(), 10);
+        }
+
+        float[] weights = new float[5] { 1f, 1f, 1f, 1f, 1f };
+        int dataLength = videoData.avgBrightness.Count;
+         float[] handledData = new float[dataLength];
+        for (int i = 0; i < peaks.Length; i++)
+        {
+            for (int j = 0; j < peaks[i].indexes.Length; j++)
+            {
+                handledData[peaks[i].indexes[j]] = peaks[i].values[j] * weights[i];
+            }
+        }
+        PeakData finalPeaks = slice(handledData, 10);
     }
 
     // Update is called once per frame
