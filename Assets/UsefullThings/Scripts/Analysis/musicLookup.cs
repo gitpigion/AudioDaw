@@ -8,9 +8,12 @@ public class MusicLookup : MonoBehaviour
     float[][] averageRGB;
 
     int bpm;
+    float sliceLength = 0.1f; // in seconds
 
     int[][] chordPositionsFINAL;
     int[][] chordTypesFINAL;
+
+    DrumRoll drumRoll;
 
     lookupTable lookupTable;
 
@@ -183,6 +186,56 @@ public class MusicLookup : MonoBehaviour
             }
         }
         PeakData finalPeaks = slice(handledData, 10);
+
+        createBPM();
+
+        BuildChord();
+        int[] positionsMAX = createMax(chordPositionsFINAL);
+        int[] typesMAX = createMax(chordTypesFINAL);
+
+
+        // then use bpm to add the chord notes to the set cells on drum roll
+        // using the video length it creates the correct amount of segments
+        // then checks where each beat would be at what slice and makes it the chord their
+        // then ta da
+
+
+        float cellLength = bpm / 60f; // in seconds
+        int cellsInSegment = 20; // arbitrary number of cells in a segment
+        int videoLength = chordsFINAL.Length *sliceLength; // the length of the video in seconds
+        int cellsInVideo = Mathf.RoundToInt(videoLength / cellLength); // the number of cells in the video
+        int segmentsInVideo = Mathf.RoundToInt(cellsInVideo / cellsInSegment);
+        
+        for (int i = 0; i < segmentsInVideo -1; i++)
+        {
+            drumRoll.CreateSegment();
+            // makes segments for the videolength assuming one already exists
+        }
+
+        // for cellsInVideo, check what slice it is in, and then add the chord notes to that cell
+        for (int i = 0; i < cellsInVideo; i++)
+        {
+            float cellTime = i * cellLength;
+            int sliceIndex = Mathf.FloorToInt(cellTime / sliceLength);
+            int[] chordNotes = LookupTable.GetChordNotes(0, (Position)(positionsMAX[sliceIndex]), (ChordType)(typesMAX[sliceIndex])); // assuming chordTypesFINAL is a 2D array with chord types for each slice
+            
+            for (int j = 0; j < chordNotes.Length; j++)
+            {
+                //public void SetCell(int row, int col, float amplitude, int Segment = -1, int Instrument = -1)
+                drumRoll.SetCell(j, (i % cellsInSegment), 1f, Mathf.FloorToInt(i / cellsInSegment), 0); // assuming instrument 0 is the one you want to use
+            }
+        }
+
+    }
+
+    int[] createMax(int[][] data)
+    {
+        for (int i = 0; i < data.Length; i++)
+        {
+            int maxIndex = Array.IndexOf(data[i], data[i].Max());
+            maxIndexes[i] = maxIndex;
+        }
+        return maxIndexes;
     }
 
 

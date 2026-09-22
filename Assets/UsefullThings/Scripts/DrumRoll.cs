@@ -242,7 +242,7 @@ public void UpdateSegment(float [,] newamplitudes, int Segment, int Instrument)
 //      increases amount of segments vairable at the END so that it starts at position 0,
 //  instantiates a segment gameobject, gets the segment class on the gameobeject
 //      sets index on segment, sets position of segment on screen, adds instruments for each instrument
-void CreateSegment()
+public void CreateSegment()
     {
         
         

@@ -138,4 +138,70 @@ public class LookupTable : MonoBehaviour
         
        
     }
+
+
+    int[] GetChordIntervals(ChordType type)
+{
+    switch (type)
+    {
+        case ChordType.Major:
+            return new int[] { 0, 4, 7 };
+
+        case ChordType.Minor:
+            return new int[] { 0, 3, 7 };
+
+        case ChordType.Diminished:
+            return new int[] { 0, 3, 6 };
+
+        case ChordType.Augmented:
+            return new int[] { 0, 4, 8 };
+
+        case ChordType.Dominant7th:
+            return new int[] { 0, 4, 7, 10 };
+
+        case ChordType.Major7th:
+            return new int[] { 0, 4, 7, 11 };
+
+        case ChordType.Minor7th:
+            return new int[] { 0, 3, 7, 10 };
+
+        case ChordType.HalfDiminished7th:
+            return new int[] { 0, 3, 6, 10 };
+
+        case ChordType.Diminished7th:
+            return new int[] { 0, 3, 6, 9 };
+
+        case ChordType.Suspended2nd:
+            return new int[] { 0, 2, 7 };
+
+        case ChordType.Suspended4th:
+            return new int[] { 0, 5, 7 };
+
+        case ChordType.Add9:
+            return new int[] { 0, 4, 7, 14 };
+
+        default:
+            return new int[] { 0, 4, 7 };
+    }
+}
+
+
+
+    int[] GetChordNotes(int key, Position position, ChordType type)
+{
+    int[] scale = { 0, 2, 4, 5, 7, 9, 11 };
+
+    int root = (key + scale[(int)position]) % 12;
+
+    int[] intervals = GetChordIntervals(type);
+
+    int[] notes = new int[intervals.Length];
+
+    for (int i = 0; i < intervals.Length; i++)
+    {
+        notes[i] = (root + intervals[i]) % 12;
+    }
+
+    return notes;
+}
 }
