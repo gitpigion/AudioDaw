@@ -9,6 +9,9 @@ public class MusicLookup : MonoBehaviour
 
     int bpm;
 
+    int[][] chordPositionsFINAL;
+    int[][] chordTypesFINAL;
+
     lookupTable lookupTable;
 
     // matches music information to the video data
@@ -235,39 +238,58 @@ public class MusicLookup : MonoBehaviour
         List<string[]>[] chordPositions = new List<string[]>[finalPeaks.indexes.Length];
         List<string[]>[] chordTypes = new List<string[]>[finalPeaks.indexes.Length];
 
-        for (int i = 0; i < finalPeaks.indexes.Length; i++)
-        {
-            // find the chord gradients for each major group
-            // then move to next major group with a high weight on previous key
-
+        List<int> likelyChordIndex = new List<int>();
+        List<int> likelyShapeIndex = new List<int>();
             List<string[]> chordForMajorGroup = new List<string[]>();
             List<string[]> positionsForMajorGroup = new List<string[]>();
 
-            int index = 0;
-
-            for (int j = index; j < finalPeaks.indexes.Length; j++)
+            for (int j = 0; j < finalPeaks.indexes.Length; j++)
             {
                 lookupTable.publicChordLookup();
-                index = j;
                 chordForMajorGroup.Add(lookupTable.chordWeights);
                 positionsForMajorGroup.Add(lookupTable.chordPositions);
-                if (j < finalPeaks.indexes[i])
-                {
-                    break;
-                }
-                // breaks when over with group
+                
+                 // then finds current most likely chord
+                 int likelyChordIndex = Array.IndexOf(lookupTable.chordWeights, lookupTable.chordWeights.Max());
+                 likelyChordIndex.Add(likelyChordIndex);
+                 int likelyShapeIndex = Array.IndexOf(lookupTable.chordPositions, lookupTable.chordPositions.Max());
+                 likelyShapeIndex.Add(likelyShapeIndex);
             }
 
             chordPositions[i] = chordForMajorGroup.ToArray();
             chordTypes[i] = positionsForMajorGroup.ToArray();
-        }
+        
         // finishes with arrays for each major group full of chord gradients
+       
 
+        RecurChord(chordPositions, chordTypes, likelyChordIndex.ToArray(), likelyShapeIndex.ToArray());
+
+        addRandomness(chordPositionsFINAL, maxRecurCount, 0.1f);
+        addRandomness(chordTypesFINAL, maxRecurCount, 0.1f);
 
 
     }
 
-    void RecurChord(string[][][] chordPositions, string[][][] chordTypes)
+    void addRandomness(int[][] data, int maxRecur, float randomness)
+    {
+        // this function will add randomness to the chord gradients
+        // it will add a random amount to each value multiplied by maxrecur
+
+        for (int i = 0; i < data.Length; i++)
+        {
+            for (int j = 0; j < data[i].Length; j++)
+            {
+                data[i][j] += Random.Range(-randomness, randomness ) * maxRecur;
+            }
+        }
+
+    }
+    
+ 
+    int recurCount = 0;
+    int maxRecurCount = 3;
+
+    void RecurChord(int[][] chordPositions, int[][] chordTypes, int likelyChordIndex[], int likelyShapeIndex[])
     {
         // this function will be recurred
         // it will loop through each major group and find the chord gradients (chords at each slice
@@ -278,31 +300,47 @@ public class MusicLookup : MonoBehaviour
         // this should mean, very short major groups will have a sinle chord, and longer groups will have progressions
 
 
-        for (int i = 0; i < chordPositions.Length; i++)
-        {
-            // find the chord gradients for each major group
-            // then move to next major group with a high weight on previous key
 
+
+             for (int j = 0; j < finalPeaks.indexes.Length; j++)
+            {
+                // if in a group it will use previous data to inform new chord
+                // could be usefull to eventualy add a weight between groups
+                
+                if ( j != finalpeaks.indexes[num] && j !=0)
+                {
+                    lookupTable.publicChordLookup(likelyChordIndex[j-1], likelyShapeIndex[j-1]);
+                }
+                else
+                {
+                    lookupTable.publicChordLookup();
+                }
+
+                chordPositions[i][j] = lookupTable.chordPositions;
+                chordTypes[i][j] = lookupTable.chordWeights;
             
 
-            int index = 0;
+                chordPositions[j] += chordForMajorGroup.ToArray();
+                chordTypes[j] += positionsForMajorGroup.ToArray();
 
-             for (int j = index; j < finalPeaks.indexes.Length; j++)
-            {
-                lookupTable.publicChordLookup();
-                index = j;
-                chordPositions[i][j-index] = lookupTable.chordPositions;
-                chordTypes[i][j-index] = lookupTable.chordWeights;
-                if (j < finalPeaks.indexes[i])
-                {
-                    break;
-                }
-                // breaks when over with group
+                int likelyChordIndex = Array.IndexOf(lookupTable.chordWeights, lookupTable.chordWeights.Max());
+                likelyChordIndex[j] = likelyChordIndex;
+                 int likelyShapeIndex = Array.IndexOf(lookupTable.chordPositions, lookupTable.chordPositions.Max());
+                likelyShapeIndex[j] = likelyShapeIndex;
+                // finds most likely chord to inform next slice
             }
 
-            chordPositions[i] = chordForMajorGroup.ToArray();
-            chordTypes[i] = positionsForMajorGroup.ToArray();
-        }
+            recurCount++;
+            if (recurCount < maxRecurCount)
+            {
+                RecurChord(chordPositions, chordTypes, likelyChordIndex.ToArray(), likelyShapeIndex.ToArray());
+            }
+            else
+            {
+                chordPositionsFINAL = chordPositions;
+                chordTypesFINAL = chordTypes;
+            }
+            
 
     }
 
