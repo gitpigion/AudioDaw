@@ -1,5 +1,8 @@
 using UnityEngine;
+using System;
 using System.Linq; 
+using System.Collections.Generic;
+using System.IO;
 
 public class MusicLookup : MonoBehaviour
 {
@@ -13,9 +16,11 @@ public class MusicLookup : MonoBehaviour
     int[][] chordPositionsFINAL;
     int[][] chordTypesFINAL;
 
+    PeakData finalPeaks;
+
     DrumRoll drumRoll;
 
-    lookupTable lookupTable;
+    LookupTable lookupTable;
 
     // matches music information to the video data
     // Create BPM and groups
@@ -153,7 +158,7 @@ public class MusicLookup : MonoBehaviour
     {
         PeakData[] peaks = new PeakData[5];
 
-        lookupTable = new lookupTable();
+        lookupTable = new LookupTable();
 
         videoData = new ReadVideo();
         averageBrightness = videoData.avgBrightness.ToArray();
@@ -185,13 +190,13 @@ public class MusicLookup : MonoBehaviour
                 handledData[peaks[i].indexes[j]] = peaks[i].values[j] * weights[i];
             }
         }
-        PeakData finalPeaks = slice(handledData, 10);
+        finalPeaks = slice(handledData, 10);
 
         createBPM();
 
         BuildChord();
-        int[] positionsMAX = createMax(chordPositionsFINAL);
-        int[] typesMAX = createMax(chordTypesFINAL);
+        int[] positionsMAX = CreateMax(chordPositionsFINAL);
+        int[] typesMAX = CreateMax(chordTypesFINAL);
 
 
         // then use bpm to add the chord notes to the set cells on drum roll
@@ -202,9 +207,11 @@ public class MusicLookup : MonoBehaviour
 
         float cellLength = bpm / 60f; // in seconds
         int cellsInSegment = 20; // arbitrary number of cells in a segment
-        int videoLength = chordsFINAL.Length *sliceLength; // the length of the video in seconds
+        float videoLength = chordTypesFINAL.Length *sliceLength; // the length of the video in seconds
         int cellsInVideo = Mathf.RoundToInt(videoLength / cellLength); // the number of cells in the video
         int segmentsInVideo = Mathf.RoundToInt(cellsInVideo / cellsInSegment);
+
+       
         
         for (int i = 0; i < segmentsInVideo -1; i++)
         {
@@ -217,7 +224,7 @@ public class MusicLookup : MonoBehaviour
         {
             float cellTime = i * cellLength;
             int sliceIndex = Mathf.FloorToInt(cellTime / sliceLength);
-            int[] chordNotes = LookupTable.GetChordNotes(0, (Position)(positionsMAX[sliceIndex]), (ChordType)(typesMAX[sliceIndex])); // assuming chordTypesFINAL is a 2D array with chord types for each slice
+            int[] chordNotes = lookupTable.GetChordNotes(0, (LookupTable.Position)(positionsMAX[sliceIndex]), (LookupTable.ChordType)(typesMAX[sliceIndex])); // assuming chordTypesFINAL is a 2D array with chord types for each slice
             
             for (int j = 0; j < chordNotes.Length; j++)
             {
@@ -228,14 +235,10 @@ public class MusicLookup : MonoBehaviour
 
     }
 
-    int[] createMax(int[][] data)
+
+    int[] CreateMax(int[][] data)
     {
-        for (int i = 0; i < data.Length; i++)
-        {
-            int maxIndex = Array.IndexOf(data[i], data[i].Max());
-            maxIndexes[i] = maxIndex;
-        }
-        return maxIndexes;
+        return data.Select(row => Array.IndexOf(row, row.Max())).ToArray();
     }
 
 
@@ -247,7 +250,7 @@ public class MusicLookup : MonoBehaviour
         // it will return a BPM value that can be used to match music to the video
         // then it will adjust peak data to match bpm, and form minor groups
 
-        float brightnessBPM = avgBrightness.Average();
+        float brightnessBPM = averageBrightness.Average();
 
         brightnessBPM = brightnessBPM /255f * 120 + 60; // scale to 60-180 bpm
 
@@ -257,10 +260,12 @@ public class MusicLookup : MonoBehaviour
         int beatsPerBar = 4; // 4/4
         // int beatsPerBar = 3; // 3/4
 
+        float beatDuration = 60f / bpm;
+
         float barDuration = beatDuration * beatsPerBar;
 
 
-        float beatDuration = 60f / bpm;
+
 
         // snaps peaks to bpm
         for (int i = 0; i < finalPeaks.indexes.Length; i++)
@@ -293,8 +298,8 @@ public class MusicLookup : MonoBehaviour
 
         List<int> likelyChordIndex = new List<int>();
         List<int> likelyShapeIndex = new List<int>();
-            List<string[]> chordForMajorGroup = new List<string[]>();
-            List<string[]> positionsForMajorGroup = new List<string[]>();
+            List<float[]> chordForMajorGroup = new List<float[]>();
+            List<float[]> positionsForMajorGroup = new List<float[]>();
 
             for (int j = 0; j < finalPeaks.indexes.Length; j++)
             {
@@ -307,6 +312,8 @@ public class MusicLookup : MonoBehaviour
                  likelyChordIndex.Add(likelyChordIndex);
                  int likelyShapeIndex = Array.IndexOf(lookupTable.chordPositions, lookupTable.chordPositions.Max());
                  likelyShapeIndex.Add(likelyShapeIndex);
+
+                 //update lookup
             }
 
             chordPositions[i] = chordForMajorGroup.ToArray();
@@ -342,7 +349,7 @@ public class MusicLookup : MonoBehaviour
     int recurCount = 0;
     int maxRecurCount = 3;
 
-    void RecurChord(int[][] chordPositions, int[][] chordTypes, int likelyChordIndex[], int likelyShapeIndex[])
+    void RecurChord(int[][] chordPositions, int[][] chordTypes, int[] likelyChordIndex, int[] likelyShapeIndex)
     {
         // this function will be recurred
         // it will loop through each major group and find the chord gradients (chords at each slice
@@ -369,12 +376,10 @@ public class MusicLookup : MonoBehaviour
                     lookupTable.publicChordLookup();
                 }
 
-                chordPositions[i][j] = lookupTable.chordPositions;
-                chordTypes[i][j] = lookupTable.chordWeights;
-            
+               
 
-                chordPositions[j] += chordForMajorGroup.ToArray();
-                chordTypes[j] += positionsForMajorGroup.ToArray();
+                chordPositions[j] += lookupTable.chordPositions;
+                chordTypes[j] += lookupTable.chordWeights;
 
                 int likelyChordIndex = Array.IndexOf(lookupTable.chordWeights, lookupTable.chordWeights.Max());
                 likelyChordIndex[j] = likelyChordIndex;

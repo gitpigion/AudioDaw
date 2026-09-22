@@ -28,9 +28,9 @@ public class LookupTable : MonoBehaviour
 
 
 
-    float[] chordWeights = new float[12];
+    public float[] chordWeights = new float[12];
 
-    enum ChordType
+    public enum ChordType
     {
         Major,
         Minor,
@@ -46,9 +46,9 @@ public class LookupTable : MonoBehaviour
         Add9
     }
 
-    public float[] chordPositions = new float[7];
+    public float[] positionWeights = new float[7];
 
-    enum Position
+    public enum Position
 {
     I,
     II,
@@ -187,7 +187,7 @@ public class LookupTable : MonoBehaviour
 
 
 
-    int[] GetChordNotes(int key, Position position, ChordType type)
+    public int[] GetChordNotes(int key, Position position, ChordType type)
 {
     int[] scale = { 0, 2, 4, 5, 7, 9, 11 };
 
