@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class ReadVideo
 {
@@ -18,6 +19,8 @@ public class ReadVideo
 
     void ReadCSV()
     {
+
+        
         using var reader = new StreamReader(CSVPath);
 
         string headerLine = reader.ReadLine();
@@ -30,7 +33,7 @@ public class ReadVideo
 
             for (int i = 0; i < fields.Length; i++)
             {
-                if (headers[i] == "avgRGB")
+                if (headers[i] == "Average_Color")
                 {
                     int[] result = fields[i]
                         .Trim('[', ']')
@@ -40,17 +43,27 @@ public class ReadVideo
 
                     avgRGB.Add(result);
                 }
-                else if (headers[i] == "avgBrightness")
+                else if (headers[i] == "Average_Brightness")
                 {
-                    float result = float.Parse(fields[i]);
+                    float result = float.Parse(
+                        fields[i],
+                        System.Globalization.CultureInfo.InvariantCulture
+                    );
+
                     avgBrightness.Add(result);
                 }
-                else if (headers[i] == "avgDifference")
+                else if (headers[i] == "Average_Frame_Difference")
                 {
-                    float result = float.Parse(fields[i]);
+                    float result = float.Parse(
+                        fields[i],
+                        System.Globalization.CultureInfo.InvariantCulture
+                    );
+
                     avgDifference.Add(result);
                 }
             }
         }
+
+        Debug.Log("Read CSV with item length " + avgDifference.Count);
     }
 }

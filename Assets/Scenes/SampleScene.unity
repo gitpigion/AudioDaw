@@ -642,6 +642,7 @@ MonoBehaviour:
   cellPrefab: {fileID: 3835258658184174524, guid: 5ccca79759be34838a711f1e3249a5c4, type: 3}
   segmentPrefab: {fileID: 6280355172336028610, guid: 679c013839c5d4272bc42aaea53b2934, type: 3}
   instrumentPrefab: {fileID: 3759879895868613664, guid: 0e492254187f04758b90b5210d9d12e6, type: 3}
+  musicLookup: {fileID: 1785867649}
   y: 12
   x: 20
   bpm: 300
@@ -656,7 +657,7 @@ MonoBehaviour:
   yPosInstruments: -2.65
   instrumentSeperation: 1.89
   squashValueX: 0
-  StartingSegmentCount: 2
+  StartingSegmentCount: 1
 --- !u!114 &1785867649
 MonoBehaviour:
   m_ObjectHideFlags: 0

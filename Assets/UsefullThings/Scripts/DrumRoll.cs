@@ -1,4 +1,5 @@
     using System.Collections.Generic;
+    using System.Collections;
 using System.Net;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -30,6 +31,8 @@ public GameObject cellPrefab;
 public GameObject segmentPrefab;
 
 public GameObject instrumentPrefab;
+
+public MusicLookup musicLookup;
 
 public int y = 8;
 public int x = 20;
@@ -81,7 +84,7 @@ public float instrumentSeperation;
 
 public float squashValueX;
 
-public int StartingSegmentCount = 2;
+public int StartingSegmentCount = 1;
 float squashValueY;
 
 float moveX = 0;
@@ -127,9 +130,16 @@ float moveY = 0;
         {
             CreateSegment();
         }
+    StartCoroutine(WaitAndRunRoutine());
    
 }
+IEnumerator WaitAndRunRoutine()
+{
+    // Wait for 1 real-world second
+    yield return new WaitForSeconds(1f);
 
+    musicLookup.Process();
+}
 
 public void CreateRoll(float[][,] amplitudes = null)
     {
@@ -157,6 +167,7 @@ public void CreateRoll(float[][,] amplitudes = null)
 //     handy way to set any value anywhere! setting -1 on segment or instrument will set them to defualt values
 public void SetCell(int row, int col, float amplitude, int Segment = -1, int Instrument = -1)
 {
+    Debug.Log($"row (y) {row} col (x) {col} amp {amplitude} segment {Segment} Instrument {Instrument}");
     if (Instrument == -1)
         {
             Instrument = curInstrument;
