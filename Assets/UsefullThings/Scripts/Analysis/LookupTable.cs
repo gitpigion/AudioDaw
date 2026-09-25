@@ -17,13 +17,21 @@ public class LookupTable : MonoBehaviour
     float brightness;
     float movement;
 
+    float maxMovementFloat;
+
+
+    public LookupTable(float maxMovement)
+    {
+        maxMovementFloat = maxMovement;
+    }
+
     public void UpdateLookupTable(float r, float g, float b, float br, float mv)
     {
-        red = r;
-        green = g;
-        blue = b;
-        brightness = br;
-        movement = mv;
+        red = r/255f;
+        green = g/255f;
+        blue = b/255f;
+        brightness = br/255f;
+        movement = mv/maxMovementFloat;
     }
 
 
@@ -73,59 +81,64 @@ public class LookupTable : MonoBehaviour
 
 
         //if red increase majors and add 9 and stronger I IV V
-        chordWeights[(int)ChordType.Major] += red * 0.5f;
-        chordWeights[(int)ChordType.Add9] += red * 0.3f;
-        chordWeights[(int)ChordType.Dominant7th] += red * 0.2f;
-        chordWeights[(int)ChordType.Major7th] += red * 0.1f;
+        chordWeights[(int)ChordType.Major]       += red * 0.25f;
+        chordWeights[(int)ChordType.Add9]        += red * 0.15f;
+        chordWeights[(int)ChordType.Dominant7th] += red * 0.10f;
+        chordWeights[(int)ChordType.Major7th]    += red * 0.10f;
 
         // green means more ambiguity
-        chordWeights[(int)ChordType.Suspended2nd] += green * 0.5f;
-        chordWeights[(int)ChordType.Suspended4th] += green * 0.3f;
-        chordWeights[(int)ChordType.Add9] += green * 0.2f;
-        chordWeights[(int)ChordType.Minor7th] += green * 0.1f;
-        chordWeights[(int)ChordType.HalfDiminished7th] += green * 0.1f;
-        chordWeights[(int)ChordType.Diminished7th] += green * 0.1f;
-        chordWeights[(int)ChordType.Diminished] += green * 0.1f;
-        chordWeights[(int)ChordType.Augmented] += green * 0.1f;
-        chordWeights[(int)ChordType.Major7th] += green * 0.1f;
+        chordWeights[(int)ChordType.Suspended2nd]      += green * 0.20f;
+        chordWeights[(int)ChordType.Suspended4th]      += green * 0.15f;
+        chordWeights[(int)ChordType.Add9]              += green * 0.10f;
+        chordWeights[(int)ChordType.Minor7th]          += green * 0.10f;
+        chordWeights[(int)ChordType.HalfDiminished7th] += green * 0.05f;
+        chordWeights[(int)ChordType.Diminished7th]     += green * 0.05f;
+        chordWeights[(int)ChordType.Diminished]        += green * 0.05f;
+        chordWeights[(int)ChordType.Augmented]         += green * 0.05f;
+        chordWeights[(int)ChordType.Major7th]          += green * 0.05f;
 
         // blue means more minor and diminished
-        chordWeights[(int)ChordType.Minor] += blue * 0.5f;
-        chordWeights[(int)ChordType.Diminished] += blue * 0.3f;
-        chordWeights[(int)ChordType.HalfDiminished7th] += blue * 0.2f;
-        chordWeights[(int)ChordType.Diminished7th] += blue * 0.1f;
-        chordWeights[(int)ChordType.Minor7th] += blue * 0.1f;
+        chordWeights[(int)ChordType.Minor]             += blue * 0.25f;
+        chordWeights[(int)ChordType.Diminished]        += blue * 0.15f;
+        chordWeights[(int)ChordType.HalfDiminished7th] += blue * 0.10f;
+        chordWeights[(int)ChordType.Diminished7th]     += blue * 0.05f;
+        chordWeights[(int)ChordType.Minor7th]          += blue * 0.10f;
 
 
         // brightness means more major and dominant
-        chordWeights[(int)ChordType.Major] += brightness * 0.5f;
-        chordWeights[(int)ChordType.Dominant7th] += brightness * 0.3f;
-        chordWeights[(int)ChordType.Major7th] += brightness * 0.2f;
-        chordWeights[(int)ChordType.Add9] += brightness * 0.1f; 
+        chordWeights[(int)ChordType.Major]       += brightness * 0.15f;
+        chordWeights[(int)ChordType.Dominant7th] += brightness * 0.10f;
+        chordWeights[(int)ChordType.Major7th]    += brightness * 0.10f;
+        chordWeights[(int)ChordType.Add9]        += brightness * 0.05f;
 
         // movement means more suspended and augmented and minor
-        chordWeights[(int)ChordType.Minor] += movement * 0.5f;
-        chordWeights[(int)ChordType.Suspended2nd] += movement * 0.5f;
-        chordWeights[(int)ChordType.Suspended4th] += movement * 0.3f;
-        chordWeights[(int)ChordType.Augmented] += movement  * 0.2f; 
+        chordWeights[(int)ChordType.Minor]        += movement * 0.15f;
+        chordWeights[(int)ChordType.Suspended2nd] += movement * 0.15f;
+        chordWeights[(int)ChordType.Suspended4th] += movement * 0.10f;
+        chordWeights[(int)ChordType.Augmented]    += movement * 0.10f; 
         
 
         // Red → stronger I, IV and V
-        positionWeights[(int)Position.I]  += red * 0.5f;
-        positionWeights[(int)Position.IV] += red * 0.4f;
-        positionWeights[(int)Position.V]  += red * 0.5f;
+        positionWeights[(int)Position.I]  += red * 0.20f;
+        positionWeights[(int)Position.IV] += red * 0.15f;
+        positionWeights[(int)Position.V]  += red * 0.20f;
 
         // Green
-        positionWeights[(int)Position.II]  += green * 0.2f;
-        positionWeights[(int)Position.III] += green * 0.3f;
-        positionWeights[(int)Position.IV]  += green * 0.3f;
-        positionWeights[(int)Position.VI]  += green * 0.3f;
+        positionWeights[(int)Position.II]  += green * 0.15f;
+        positionWeights[(int)Position.III] += green * 0.15f;
+        positionWeights[(int)Position.IV]  += green * 0.10f;
+        positionWeights[(int)Position.VI]  += green * 0.15f;
 
         // Blue
-        positionWeights[(int)Position.II]  += blue * 0.4f;
-        positionWeights[(int)Position.III] += blue * 0.4f;
-        positionWeights[(int)Position.VI]  += blue * 0.5f;
-        positionWeights[(int)Position.VII] += blue * 0.5f;
+        positionWeights[(int)Position.II]  += blue * 0.15f;
+        positionWeights[(int)Position.III] += blue * 0.15f;
+        positionWeights[(int)Position.VI]  += blue * 0.20f;
+        positionWeights[(int)Position.VII] += blue * 0.20f;
+
+        for (int i = 0; i < chordWeights.Length; i++)
+        {
+            Debug.Log($"Chord weight for {(ChordType)i}: {chordWeights[i]}");
+        }
 
 
         if (previousChord != -1 && previousShape != -1)

@@ -4,21 +4,21 @@ using System.Net;
 
 public static class NoteTable
 {
-    public static readonly Dictionary<int, float> NoteFrequencies = new Dictionary<int, float>
-    {
-        { 0,  138.59f },  // C#3
-        { 1,  146.83f },  // D3
-        { 2,  155.56f },  // Eb3
-        { 3,  164.81f },  // E3
-        { 4,  174.61f },  // F3
-        { 5,  185.00f },  // F#3
-        { 6,  196.00f },  // G3
-        { 7,  207.65f },  // Ab3
-        { 8,  220.00f },  // A3
-        { 9,  233.08f },  // Bb3
-        { 10, 246.94f },  // B3
-        { 11, 261.63f },  // C4
-    };
+   public static readonly Dictionary<int, float> NoteFrequencies = new Dictionary<int, float>
+{
+    { 0,  277.18f },  // C#4
+    { 1,  293.66f },  // D4
+    { 2,  311.12f },  // Eb4
+    { 3,  329.63f },  // E4
+    { 4,  349.23f },  // F4
+    { 5,  369.99f },  // F#4
+    { 6,  392.00f },  // G4
+    { 7,  415.30f },  // Ab4
+    { 8,  440.00f },  // A4
+    { 9,  466.16f },  // Bb4
+    { 10, 493.88f },  // B4
+    { 11, 523.25f },  // C5
+};
 
     public static float GetFrequency(int note) => NoteFrequencies[note];
 }

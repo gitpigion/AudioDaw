@@ -14,6 +14,8 @@ public class MusicLookup : MonoBehaviour
     int dataLength;
     float sliceLength = 0.1f; // in seconds
 
+    float maxMovement; // this is used to normalize data for lookuptable
+
     int[] finalChordPositions;
     int[] finalChordTypes;
 
@@ -162,7 +164,7 @@ public class MusicLookup : MonoBehaviour
     public void Process()
     {
         PeakData[] peaks = new PeakData[5];
-        lookupTable = new LookupTable();
+
         videoData = new ReadVideo();
 
 
@@ -172,7 +174,7 @@ public class MusicLookup : MonoBehaviour
         Debug.Log("size of data given is " + dataLength);
         averageRGB = new float[videoData.avgRGB.Count][];
 
-        
+        lookupTable = new LookupTable(averageDifference.Max());
 
 
         for (int i = 0; i < videoData.avgRGB.Count; i++)
@@ -258,7 +260,7 @@ public class MusicLookup : MonoBehaviour
         for (int i = 0; i < finalPeaks.indexes.Length; i++)
         {
             int index = finalPeaks.indexes[i];
-            float indexTime = index / fps; // what time the index is
+            float indexTime = (float)index / fps; // what time the index is
 
             float segmentTime = cellsInSegment * cellLength;
             int whatSegment = Mathf.FloorToInt(indexTime/segmentTime); 
@@ -269,6 +271,8 @@ public class MusicLookup : MonoBehaviour
 
             int whatNoteInSegment = Mathf.FloorToInt(whatTimeInSegment/cellLength);
 
+            Debug.Log($"place note on note {whatNoteInSegment} which is index {index} at time {indexTime}");
+
           
 
             int[] chordNotes = lookupTable.GetChordNotes(0, 
@@ -278,7 +282,7 @@ public class MusicLookup : MonoBehaviour
             
             for (int j = 0; j < chordNotes.Length; j++)
             {
-                Debug.Log($"placing note on {whatNoteInSegment} on segment {whatSegment}");
+                //Debug.Log($"placing note on {whatNoteInSegment} on segment {whatSegment}");
                 //public void SetCell(int row, int col, float amplitude, int Segment = -1, int Instrument = -1)
                 drumRoll.SetCell(chordNotes[j], whatNoteInSegment, 1f, whatSegment, 0); // assuming instrument 0 is the one you want to use
             }

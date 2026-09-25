@@ -93,9 +93,9 @@ public class WaveMaker : AudioPull
         {
             envelopes[i] = new Envelope
             {
-                attack = 0.05f,
-                decay = 0.1f,
-                sustain = 0.5f,
+                attack = 0.01f,
+                decay = 0.05f,
+                sustain = 0.7f,
                 release = 0.3f,
                 amplitude = pendingAmplitudes[i]
 
