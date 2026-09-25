@@ -199,9 +199,9 @@ public class LookupTable : MonoBehaviour
 
         if (previousChord != -1 && previousShape != -1)
         {       
-            //chordWeights[previousChord] +=  0.5f;
+            chordWeights[previousChord] +=  0.5f;
 
-            //positionWeights[previousShape] += 0.5f;
+            positionWeights[previousShape] += 0.5f;
         }
         
         

@@ -30,6 +30,8 @@ public GameObject cellPrefab;
 
 public GameObject segmentPrefab;
 
+public VideoController vidController;
+
 public GameObject instrumentPrefab;
 
 public MusicLookup musicLookup;
@@ -142,6 +144,8 @@ IEnumerator WaitAndRunRoutine()
     yield return new WaitForSeconds(1f);
 
     musicLookup.Process();
+    vidController.Play();
+    
 }
 
 public void CreateRoll(float[][,] amplitudes = null)
@@ -340,6 +344,7 @@ void Update()
                 if (curSegment >= amountOfSegments - 1)
                 {
                     SwitchSegment(0);
+                    vidController.RestartVideo();
                 }
                 else
                 {
@@ -349,6 +354,7 @@ void Update()
             }
             loopPosition = 0;
             resetLine();
+            
         }
             
         }
