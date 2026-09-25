@@ -1,4 +1,8 @@
 using UnityEngine;
+using System;
+using System.Linq; 
+using System.Collections.Generic;
+using System.IO;
 
 public class LookupTable : MonoBehaviour
 {
@@ -27,6 +31,7 @@ public class LookupTable : MonoBehaviour
 
     public void UpdateLookupTable(float r, float g, float b, float br, float mv)
     {
+       
         red = r/255f;
         green = g/255f;
         blue = b/255f;
@@ -78,7 +83,8 @@ public class LookupTable : MonoBehaviour
         // depedngin on data it will use ranges for each color and brightness
         // then it will compare how strongly each chord is represented
         // then return chord
-
+         Array.Clear(positionWeights, 0, positionWeights.Length);
+        Array.Clear(chordWeights, 0, chordWeights.Length);
 
         //if red increase majors and add 9 and stronger I IV V
         chordWeights[(int)ChordType.Major]       += red * 0.25f;
@@ -135,17 +141,67 @@ public class LookupTable : MonoBehaviour
         positionWeights[(int)Position.VI]  += blue * 0.20f;
         positionWeights[(int)Position.VII] += blue * 0.20f;
 
+
+        float[] chordTotals =
+        {
+            0.40f, // Major
+            0.40f, // Minor
+            0.20f, // Diminished
+            0.15f, // Augmented
+            0.20f, // Dominant7th
+            0.25f, // Major7th
+            0.20f, // Minor7th
+            0.15f, // HalfDiminished7th
+            0.10f, // Diminished7th
+            0.35f, // Suspended2nd
+            0.25f, // Suspended4th
+            0.30f  // Add9
+        };
+
+        float target = 0.40f;
+
+        for (int i = 0; i < chordWeights.Length; i++)
+        {
+            if (chordTotals[i] > 0)
+                chordWeights[i] *= target / chordTotals[i];
+        }
+
+
+        float[] positionTotals =
+        {
+            0.20f, // I
+            0.30f, // II
+            0.30f, // III
+            0.25f, // IV
+            0.20f, // V
+            0.35f, // VI
+            0.20f  // VII
+        };
+
+        target = 0.30f;
+
+        for (int i = 0; i < positionWeights.Length; i++)
+        {
+            if (positionTotals[i] > 0)
+                positionWeights[i] *= target / positionTotals[i];
+        }
+
+
         for (int i = 0; i < chordWeights.Length; i++)
         {
             Debug.Log($"Chord weight for {(ChordType)i}: {chordWeights[i]}");
+        }
+        for (int i = 0; i < positionWeights.Length; i++)
+        {
+            Debug.Log($"position weight for {(Position)i}: {positionWeights[i]}");
         }
 
 
         if (previousChord != -1 && previousShape != -1)
         {       
-            chordWeights[previousChord] +=  0.5f;
+            //chordWeights[previousChord] +=  0.5f;
 
-            positionWeights[previousShape] += 0.5f;
+            //positionWeights[previousShape] += 0.5f;
         }
         
         

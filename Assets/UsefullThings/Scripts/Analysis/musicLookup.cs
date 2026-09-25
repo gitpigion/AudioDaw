@@ -12,7 +12,9 @@ public class MusicLookup : MonoBehaviour
 
     int bpm;
     int dataLength;
-    float sliceLength = 0.1f; // in seconds
+
+    int sliceThreshold;
+    float thresholdConst = 1;
 
     float maxMovement; // this is used to normalize data for lookuptable
 
@@ -159,13 +161,14 @@ public class MusicLookup : MonoBehaviour
     // very similar to slice, but with much smaller data set
     // multiplies the values of each peak by the weight of that peak
    
-
+    
     // slices each of the 5 values and returns the peak data
     public void Process()
     {
         PeakData[] peaks = new PeakData[5];
 
         videoData = new ReadVideo();
+
 
 
         averageBrightness = videoData.avgBrightness.ToArray();
@@ -175,6 +178,10 @@ public class MusicLookup : MonoBehaviour
         averageRGB = new float[videoData.avgRGB.Count][];
 
         lookupTable = new LookupTable(averageDifference.Max());
+
+
+        sliceThreshold =  Mathf.RoundToInt(dataLength * fps / thresholdConst);
+        Debug.Log($"slice threshhold = {sliceThreshold}");
 
 
         for (int i = 0; i < videoData.avgRGB.Count; i++)
@@ -189,11 +196,11 @@ public class MusicLookup : MonoBehaviour
 
         // has set up all arrays
 
-        peaks[0] = slice(averageBrightness, 10);
-        peaks[1] = slice(averageDifference, 10);
+        peaks[0] = slice(averageBrightness, sliceThreshold);
+        peaks[1] = slice(averageDifference, sliceThreshold);
         for (int i = 0; i < 3; i++)
         {
-            peaks[2 + i] = slice(averageRGB.Select(x => x[i]).ToArray(), 10);
+            peaks[2 + i] = slice(averageRGB.Select(x => x[i]).ToArray(), sliceThreshold);
         }
         // has found max peaks for all data
 
@@ -209,11 +216,11 @@ public class MusicLookup : MonoBehaviour
             }
         }
         // ordeded based of intensity of movement
-        finalPeaks = slice(handledData, 10);
+        finalPeaks = slice(handledData, sliceThreshold);
 
         for (int i = 0; i < finalPeaks.indexes.Length; i++ )
         {
-            Debug.Log("peak at "+ finalPeaks.indexes[i]+ " with value " + finalPeaks.values[i]);
+           // Debug.Log("peak at "+ finalPeaks.indexes[i]+ " with value " + finalPeaks.values[i]);
         }
 
         createBPM();
@@ -237,15 +244,16 @@ public class MusicLookup : MonoBehaviour
     void addToDrumRoll()
     {
         drumRoll.bpm = bpm;
+        Debug.Log($"fps = {fps} and dataLength = {dataLength}");
          float cellLength =  60f / bpm / drumRoll.cellsPerBeat; // in seconds
          Debug.Log($"cell length = {cellLength}");
         int cellsInSegment = 20; // arbitrary number of cells in a segment
-        float videoLength = dataLength *sliceLength; // the length of the video in seconds
+        float videoLength = dataLength *1/fps; // the length of the video in seconds
         Debug.Log($"videoLength = {videoLength}");
         int cellsInVideo = Mathf.CeilToInt(videoLength / cellLength); // the number of cells in the video
          Debug.Log($"cellsInVideo = {cellsInVideo}");
         int segmentsInVideo = Mathf.CeilToInt((float)cellsInVideo / cellsInSegment);
-        Debug.Log($"segmentsInVideo = {segmentsInVideo}");
+        Debug.Log($"segmentsInVideo = {segmentsInVideo} with a segment time of {cellLength * cellsInSegment}");
 
        
         
@@ -271,7 +279,7 @@ public class MusicLookup : MonoBehaviour
 
             int whatNoteInSegment = Mathf.FloorToInt(whatTimeInSegment/cellLength);
 
-            Debug.Log($"place note on note {whatNoteInSegment} which is index {index} at time {indexTime}");
+            //Debug.Log($"place note on note {whatNoteInSegment} which is index {index} at time {indexTime}");
 
           
 
@@ -290,7 +298,7 @@ public class MusicLookup : MonoBehaviour
     }
 
 
-    int fps = 30;
+    int fps = 10;
 
     void createBPM()
     {

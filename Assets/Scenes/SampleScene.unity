@@ -660,7 +660,7 @@ MonoBehaviour:
   yPosInstruments: -2.65
   instrumentSeperation: 1.89
   squashValueX: 0
-  StartingSegmentCount: 1
+  StartingSegmentCount: 0
 --- !u!114 &1785867649
 MonoBehaviour:
   m_ObjectHideFlags: 0
