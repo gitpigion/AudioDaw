@@ -643,13 +643,16 @@ MonoBehaviour:
   segmentPrefab: {fileID: 6280355172336028610, guid: 679c013839c5d4272bc42aaea53b2934, type: 3}
   instrumentPrefab: {fileID: 3759879895868613664, guid: 0e492254187f04758b90b5210d9d12e6, type: 3}
   musicLookup: {fileID: 1785867649}
+  segmentPlayThrough: 1
   y: 12
   x: 20
   bpm: 300
+  cellsPerBeat: 4
   loopSize: 0
   LineGameObject: {fileID: 1672617471979675701, guid: 1dd3ee1e9cbd844bc9460755108186b6, type: 3}
   LineEndPoint: {x: 0, y: 0, z: 0}
   LineStartPoint: {x: 0, y: 1.89, z: 0}
+  curSegment: 0
   xPosSegments: -3.8
   yPosSegments: 3.84
   segmentSeperation: 2

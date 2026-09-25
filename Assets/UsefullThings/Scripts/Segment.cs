@@ -4,8 +4,30 @@ public class Segment : MonoBehaviour
 {
     public int Index;
 
+    public DrumRoll drumRoll;
+
+    public SpriteRenderer sr;
+
     // amps[instrument][x,y]
     public float[][,] amps;
+
+    void Start()
+    {
+        sr = GetComponent<SpriteRenderer>();
+    }
+
+    void Update()
+    {
+        if (drumRoll.curSegment == Index)
+        {
+            sr.color = Color.grey; 
+        }
+        else
+        {
+            sr.color = Color.white; 
+        }
+    }
+
 
 
     //      if no amplitudes logged (first run) creates array with size equal to the keybed (x,y) supplied
@@ -32,4 +54,6 @@ public class Segment : MonoBehaviour
 
         amps = newAmps;
     }
+
+
 }

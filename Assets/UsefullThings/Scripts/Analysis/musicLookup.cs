@@ -234,7 +234,8 @@ public class MusicLookup : MonoBehaviour
         // then ta da
     void addToDrumRoll()
     {
-         float cellLength =  60f / bpm; // in seconds
+        drumRoll.bpm = bpm;
+         float cellLength =  60f / bpm / drumRoll.cellsPerBeat; // in seconds
          Debug.Log($"cell length = {cellLength}");
         int cellsInSegment = 20; // arbitrary number of cells in a segment
         float videoLength = dataLength *sliceLength; // the length of the video in seconds
@@ -256,17 +257,30 @@ public class MusicLookup : MonoBehaviour
         // for cellsInVideo, check what slice it is in, and then add the chord notes to that cell
         for (int i = 0; i < finalPeaks.indexes.Length; i++)
         {
+            int index = finalPeaks.indexes[i];
+            float indexTime = index / fps; // what time the index is
+
+            float segmentTime = cellsInSegment * cellLength;
+            int whatSegment = Mathf.FloorToInt(indexTime/segmentTime); 
+            // divides the time where the chord is by the time of a segment, then rounds down
+
+            float whatTimeInSegment = indexTime % segmentTime;
+            // takes the remainder and rounds to find how many seconds into the segment it is
+
+            int whatNoteInSegment = Mathf.FloorToInt(whatTimeInSegment/cellLength);
+
           
 
             int[] chordNotes = lookupTable.GetChordNotes(0, 
             (LookupTable.Position)(finalChordPositions[i]),
              (LookupTable.ChordType)(finalChordTypes[i])); 
             // assuming finalChordTypes is a 2D array with chord types for each slice
-            Debug.Log($"chord length for chord {i} = {chordNotes.Length}");
+            
             for (int j = 0; j < chordNotes.Length; j++)
             {
+                Debug.Log($"placing note on {whatNoteInSegment} on segment {whatSegment}");
                 //public void SetCell(int row, int col, float amplitude, int Segment = -1, int Instrument = -1)
-                drumRoll.SetCell(chordNotes[j], (i % cellsInSegment), 1f, Mathf.FloorToInt(i / cellsInSegment), 0); // assuming instrument 0 is the one you want to use
+                drumRoll.SetCell(chordNotes[j], whatNoteInSegment, 1f, whatSegment, 0); // assuming instrument 0 is the one you want to use
             }
         }
     }
@@ -295,7 +309,6 @@ public class MusicLookup : MonoBehaviour
         float beatDuration = 60f / bpm;
 
         float barDuration = beatDuration * beatsPerBar;
-
 
 
 

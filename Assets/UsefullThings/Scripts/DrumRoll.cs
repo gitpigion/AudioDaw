@@ -34,10 +34,13 @@ public GameObject instrumentPrefab;
 
 public MusicLookup musicLookup;
 
+public bool segmentPlayThrough;
+
 public int y = 8;
 public int x = 20;
 
 public int bpm = 120;
+public int cellsPerBeat = 4;
 
 public int loopSize;
 private int loopPosition;
@@ -68,7 +71,7 @@ Segment[][] InstrumentsSegments;
 // this list will be same length as audio midis
 // this will be updated with an array of empty segments when a new instrument is made
 
-int curSegment;
+public int curSegment;
 int curInstrument;
 
 public float xPosSegments;
@@ -167,7 +170,7 @@ public void CreateRoll(float[][,] amplitudes = null)
 //     handy way to set any value anywhere! setting -1 on segment or instrument will set them to defualt values
 public void SetCell(int row, int col, float amplitude, int Segment = -1, int Instrument = -1)
 {
-    Debug.Log($"row (y) {row} col (x) {col} amp {amplitude} segment {Segment} Instrument {Instrument}");
+    //Debug.Log($"row (y) {row} col (x) {col} amp {amplitude} segment {Segment} Instrument {Instrument}");
     if (Instrument == -1)
         {
             Instrument = curInstrument;
@@ -177,8 +180,7 @@ public void SetCell(int row, int col, float amplitude, int Segment = -1, int Ins
             Segment = curSegment;
         }
 
-    amplitudes[Instrument][col, row] = amplitude;
-    UpdateSegment(amplitudes[Instrument], Segment, Instrument); 
+    segmentClasses[Segment].amps[Instrument][col, row] = amplitude;
     
 }
 
@@ -260,10 +262,11 @@ public void CreateSegment()
         GameObject seg = Instantiate(segmentPrefab);
 
         Segment segClass;
+        
         segmentObjs.Add(seg);
         segClass = seg.GetComponent<Segment>();
         segmentClasses.Add(segClass);
-
+        segClass.drumRoll = this;
         segClass.Index = amountOfSegments;
         seg.transform.position = new Vector3 (xPosSegments + (1+segClass.Index) * segmentSeperation,yPosSegments,0);
 
@@ -319,10 +322,10 @@ float timer = 0;
 //      moves line visual, if its time for a new beat, loops through all instruments and plays the notes on the accociated midis
 void Update()
 {
-    Line.transform.position = new Vector3 (Line.transform.position.x +( Time.deltaTime/(60f/bpm))*squashValueX, 
+    Line.transform.position = new Vector3 (Line.transform.position.x +( Time.deltaTime/(60f/(bpm * cellsPerBeat)))*squashValueX, 
     Line.transform.position.y, Line.transform.position.z);
     timer += Time.deltaTime;
-    if (timer >= 60f/bpm )
+    if (timer >= 60f/(bpm * cellsPerBeat) )
         {
             timer = 0;
             for (int i = 0; i < amountOfInstruments; i++)
@@ -332,6 +335,18 @@ void Update()
             loopPosition++;
         if (loopPosition >= x)
         {
+            if (segmentPlayThrough)
+            {
+                if (curSegment >= amountOfSegments - 1)
+                {
+                    SwitchSegment(0);
+                }
+                else
+                {
+                    SwitchSegment(curSegment + 1);
+                }
+                
+            }
             loopPosition = 0;
             resetLine();
         }
