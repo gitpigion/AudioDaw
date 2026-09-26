@@ -23,10 +23,27 @@ public class LookupTable : MonoBehaviour
 
     float maxMovementFloat;
 
+    public int key;
+    public bool minor;
+
+    float keySTICKER = 0.1f;
+
 
     public LookupTable(float maxMovement)
     {
         maxMovementFloat = maxMovement;
+        keyNotes = new int[24][]; // 24 so 12 major and minor
+
+        for (int i = 0; i < 12; i++)
+        {
+            keyNotes[i] = GetKeyNotes(i,false);
+            
+        }
+        for (int i = 12; i < 24; i++)
+        {
+            keyNotes[i] = GetKeyNotes(i,true);
+        }
+        
     }
 
     public void UpdateLookupTable(float r, float g, float b, float br, float mv)
@@ -62,15 +79,40 @@ public class LookupTable : MonoBehaviour
     public float[] positionWeights = new float[7];
 
     public enum Position
-{
-    I,
-    II,
-    III,
-    IV,
-    V,
-    VI,
-    VII
-}
+    {
+        I,
+        II,
+        III,
+        IV,
+        V,
+        VI,
+        VII
+    }
+    float[] chordTotals =
+    {
+        0.40f, // Major
+        0.40f, // Minor
+        0.20f, // Diminished
+        0.15f, // Augmented
+        0.20f, // Dominant7th
+        0.25f, // Major7th
+        0.20f, // Minor7th
+        0.15f, // HalfDiminished7th
+        0.10f, // Diminished7th
+        0.35f, // Suspended2nd
+        0.25f, // Suspended4th
+        0.30f  // Add9
+    };
+    float[] positionTotals =
+    {
+        0.20f, // I
+        0.30f, // II
+        0.30f, // III
+        0.25f, // IV
+        0.20f, // V
+        0.35f, // VI
+        0.20f  // VII
+    };
 
 
     // this array is the likelyhood based of previous chords
@@ -142,21 +184,7 @@ public class LookupTable : MonoBehaviour
         positionWeights[(int)Position.VII] += blue * 0.20f;
 
 
-        float[] chordTotals =
-        {
-            0.40f, // Major
-            0.40f, // Minor
-            0.20f, // Diminished
-            0.15f, // Augmented
-            0.20f, // Dominant7th
-            0.25f, // Major7th
-            0.20f, // Minor7th
-            0.15f, // HalfDiminished7th
-            0.10f, // Diminished7th
-            0.35f, // Suspended2nd
-            0.25f, // Suspended4th
-            0.30f  // Add9
-        };
+        
 
         float target = 0.40f;
 
@@ -167,16 +195,7 @@ public class LookupTable : MonoBehaviour
         }
 
 
-        float[] positionTotals =
-        {
-            0.20f, // I
-            0.30f, // II
-            0.30f, // III
-            0.25f, // IV
-            0.20f, // V
-            0.35f, // VI
-            0.20f  // VII
-        };
+        
 
         target = 0.30f;
 
@@ -189,11 +208,11 @@ public class LookupTable : MonoBehaviour
 
         for (int i = 0; i < chordWeights.Length; i++)
         {
-            Debug.Log($"Chord weight for {(ChordType)i}: {chordWeights[i]}");
+            //Debug.Log($"Chord weight for {(ChordType)i}: {chordWeights[i]}");
         }
         for (int i = 0; i < positionWeights.Length; i++)
         {
-            Debug.Log($"position weight for {(Position)i}: {positionWeights[i]}");
+            //Debug.Log($"position weight for {(Position)i}: {positionWeights[i]}");
         }
 
 
@@ -203,6 +222,16 @@ public class LookupTable : MonoBehaviour
 
             positionWeights[previousShape] += 0.5f;
         }
+
+        for (int i = 0; i < positionWeights.Length; i++)
+        {
+            for (int j = 0; j< chordWeights.Length; j++)
+            {
+                float modifier = IsInKey(key, i, j);
+                positionWeights[i] += modifier * keySTICKER;
+                chordWeights[i] += modifier * keySTICKER;
+            }
+        }
         
         
        
@@ -210,67 +239,139 @@ public class LookupTable : MonoBehaviour
 
 
     int[] GetChordIntervals(ChordType type)
-{
-    switch (type)
     {
-        case ChordType.Major:
-            return new int[] { 0, 4, 7 };
+        switch (type)
+        {
+            case ChordType.Major:
+                return new int[] { 0, 4, 7 };
 
-        case ChordType.Minor:
-            return new int[] { 0, 3, 7 };
+            case ChordType.Minor:
+                return new int[] { 0, 3, 7 };
 
-        case ChordType.Diminished:
-            return new int[] { 0, 3, 6 };
+            case ChordType.Diminished:
+                return new int[] { 0, 3, 6 };
 
-        case ChordType.Augmented:
+            case ChordType.Augmented:
             return new int[] { 0, 4, 8 };
 
-        case ChordType.Dominant7th:
-            return new int[] { 0, 4, 7, 10 };
+            case ChordType.Dominant7th:
+                return new int[] { 0, 4, 7, 10 };
 
-        case ChordType.Major7th:
-            return new int[] { 0, 4, 7, 11 };
+            case ChordType.Major7th:
+                return new int[] { 0, 4, 7, 11 };
 
-        case ChordType.Minor7th:
-            return new int[] { 0, 3, 7, 10 };
+            case ChordType.Minor7th:
+                return new int[] { 0, 3, 7, 10 };
 
-        case ChordType.HalfDiminished7th:
-            return new int[] { 0, 3, 6, 10 };
+            case ChordType.HalfDiminished7th:
+                return new int[] { 0, 3, 6, 10 };
 
-        case ChordType.Diminished7th:
-            return new int[] { 0, 3, 6, 9 };
+            case ChordType.Diminished7th:
+                return new int[] { 0, 3, 6, 9 };
 
-        case ChordType.Suspended2nd:
-            return new int[] { 0, 2, 7 };
+            case ChordType.Suspended2nd:
+                return new int[] { 0, 2, 7 };
 
-        case ChordType.Suspended4th:
-            return new int[] { 0, 5, 7 };
+            case ChordType.Suspended4th:
+                return new int[] { 0, 5, 7 };
 
-        case ChordType.Add9:
-            return new int[] { 0, 4, 7, 14 };
+            case ChordType.Add9:
+                return new int[] { 0, 4, 7, 14 };
 
-        default:
-            return new int[] { 0, 4, 7 };
+            default:
+                return new int[] { 0, 4, 7 };
+        }
     }
-}
 
 
 
     public int[] GetChordNotes(int key, Position position, ChordType type)
-{
-    int[] scale = { 0, 2, 4, 5, 7, 9, 11 };
-
-    int root = (key + scale[(int)position]) % 12;
-
-    int[] intervals = GetChordIntervals(type);
-
-    int[] notes = new int[intervals.Length];
-
-    for (int i = 0; i < intervals.Length; i++)
     {
-        notes[i] = (root + intervals[i]) % 12;
+
+        bool isMinor = (key >=12);
+
+        int[] scale;
+
+        if (isMinor)
+        {
+            scale = new int[]{ 0, 2, 3, 5, 7, 8, 11 };
+        }
+        else
+        {
+            scale = new int[]{ 0, 2, 4, 5, 7, 9, 11 };
+        }
+
+        
+        int root = (key + scale[(int)position]) % 12;
+
+        int[] intervals = GetChordIntervals(type);
+
+        int[] notes = new int[intervals.Length];
+
+        for (int i = 0; i < intervals.Length; i++)
+        {
+            notes[i] = (root + intervals[i]) % 12;
+        }
+
+        return notes;
     }
 
-    return notes;
-}
+
+    // we know intervals for both so jut add them to key then ignore anything out of octave
+    int[] GetKeyNotes(int key, bool minor)
+    {
+        int[] intervals;
+
+        if (minor)
+            intervals = new int[] { 0, 2, 3, 5, 7, 8, 10 }; //  minor
+        else
+            intervals = new int[] { 0, 2, 4, 5, 7, 9, 11 }; // Major
+
+        int[] notes = new int[7];
+
+        for (int i = 0; i < intervals.Length; i++)
+        {
+            notes[i] = (key + intervals[i]) % 12;
+        }
+
+        return notes;
+    }
+
+    int[][] keyNotes; // array of all keys and what notes they have
+
+
+    // checks if all notes of a chord lie in same key
+    // does this by using KEY and get keynotes to see the percentage of notes
+    // and returning a float as a percentage that has run through a funciton that decides how big of an issue the wrong chord is
+
+    float IsInKey(int key, int position, int type)
+    {
+        int[] chordNotes = GetChordNotes(key, (Position)position, (ChordType)type);
+        int intersectCount = 0;
+
+        int[] curKeyNotes = keyNotes[key];
+        
+
+        foreach (int chordNote in chordNotes)
+        {   
+            foreach (int keyNote in curKeyNotes)
+            {
+                if (chordNote == keyNote)
+                {
+                    intersectCount++;
+                    break;
+                }
+            }
+        }
+
+    return intersectCount / (float)chordNotes.Length;
+
+
+    }
+
+
+
+
+
+
 }

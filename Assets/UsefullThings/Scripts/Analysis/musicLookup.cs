@@ -225,8 +225,20 @@ public class MusicLookup : MonoBehaviour
 
         createBPM();
         Debug.Log("BPM is " + bpm);
+        
+
+        // uses how much blue to decide major minor, how much red to decide note?
+
+        float avgRED = averageRGB[0].Average();
+        float avgBLUE = averageRGB[2].Average();
+        int key = Mathf.RoundToInt(avgRED/255) *12;
+
+        bool minor = (avgBLUE/255 >= 0.5f);
+
+        lookupTable.key = key;
+        lookupTable.minor = minor;
+
         BuildChord();
- 
 
         addToDrumRoll();
 
